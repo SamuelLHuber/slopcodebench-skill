@@ -1,0 +1,2848 @@
+---
+id: zig-chained-comparison-opportunity
+language: zig
+severity: warning
+message: '[mechanical Zig port of chained-comparison-opportunity] `a < b and b < c` - use chained form `a < b < c`'
+metadata:
+  category: slop
+  source_python_rule: chained-comparison-opportunity
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-bool-comparison
+language: zig
+severity: warning
+message: '[mechanical Zig port of bool-comparison] `x == True` / `x == False` - use `if x:` / `if not x:`'
+metadata:
+  category: slop
+  source_python_rule: bool-comparison
+rule:
+  kind: binary_expression
+  any:
+    - pattern: '_EXPR == true'
+    - pattern: '_EXPR == false'
+    - pattern: '_EXPR != true'
+    - pattern: '_EXPR != false'
+
+---
+id: zig-chained-none-check
+language: zig
+severity: info
+message: '[mechanical Zig port of chained-none-check] `x is not None and y is not None` - use `all(v is not None for v in (x, y))` or try/except'
+metadata:
+  category: slop
+  source_python_rule: chained-none-check
+rule:
+  kind: if_statement
+  all:
+    - regex: '(==|!=)\s*null[\s\S]*(and|or)[\s\S]*(==|!=)\s*null'
+    - has:
+        stopBy: end
+        any:
+          - kind: return_expression
+          - kind: continue_expression
+          - kind: break_expression
+
+---
+id: zig-empty-string-or
+language: zig
+severity: info
+message: '[mechanical Zig port of empty-string-or] `x == '''' or ...` - use `not x` to catch empty string via truthiness'
+metadata:
+  category: slop
+  source_python_rule: empty-string-or
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-pointless-bool-cast
+language: zig
+severity: warning
+message: '[mechanical Zig port of pointless-bool-cast] `if bool(x):` - drop `bool()`, `if` already tests truthiness'
+metadata:
+  category: slop
+  source_python_rule: pointless-bool-cast
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-redundant-bool-in-condition
+language: zig
+severity: warning
+message: '[mechanical Zig port of redundant-bool-in-condition] `bool(x)` inside `if`/`and`/`or` - drop it, these already test truthiness'
+metadata:
+  category: slop
+  source_python_rule: redundant-bool-in-condition
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-redundant-bool-ternary
+language: zig
+severity: warning
+message: '[mechanical Zig port of redundant-bool-ternary] `True if x else False` - use `bool(x)` (or just `x` if already boolean)'
+metadata:
+  category: slop
+  source_python_rule: redundant-bool-ternary
+rule:
+  kind: if_expression
+  regex: '(true[\s\S]*else[\s\S]*false|false[\s\S]*else[\s\S]*true)'
+
+---
+id: zig-redundant-none-empty-check
+language: zig
+severity: info
+message: '[mechanical Zig port of redundant-none-empty-check] `x is not None and x != ''''` - use `if x:` (empty string is also falsy)'
+metadata:
+  category: slop
+  source_python_rule: redundant-none-empty-check
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-len-as-condition
+language: zig
+severity: warning
+message: '[mechanical Zig port of len-as-condition] `len(x) == 0` - use `if not x:` (or `if x:` for `> 0`)'
+metadata:
+  category: slop
+  source_python_rule: len-as-condition
+rule:
+  kind: binary_expression
+  any:
+    - pattern: '_X.len == 0'
+    - pattern: '_X.len != 0'
+    - pattern: '_X.len > 0'
+    - pattern: '_X.len >= 1'
+    - pattern: '_X.len < 1'
+
+---
+id: zig-len-comparison
+language: zig
+severity: warning
+message: '[mechanical Zig port of len-comparison] `len(x) > 0` / `len(x) != 0` - use `if x:`'
+metadata:
+  category: slop
+  source_python_rule: len-comparison
+rule:
+  kind: binary_expression
+  any:
+    - pattern: '_X.len == 0'
+    - pattern: '_X.len != 0'
+    - pattern: '_X.len > 0'
+    - pattern: '_X.len >= 1'
+    - pattern: '_X.len < 1'
+
+---
+id: zig-type-equality
+language: zig
+severity: warning
+message: '[mechanical Zig port of type-equality] `type(x) == T` - use `isinstance(x, T)` (handles subclasses)'
+metadata:
+  category: slop
+  source_python_rule: type-equality
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-multiple-isinstance-or
+language: zig
+severity: warning
+message: '[mechanical Zig port of multiple-isinstance-or] `isinstance(x, A) or isinstance(x, B)` - use `isinstance(x, (A, B))`'
+metadata:
+  category: slop
+  source_python_rule: multiple-isinstance-or
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-isinstance-bool-exclusion
+language: zig
+severity: info
+message: '[mechanical Zig port of isinstance-bool-exclusion] `isinstance(x, bool)` - `bool` is an `int` subclass; reconsider whether you want type-specific handling'
+metadata:
+  category: slop
+  source_python_rule: isinstance-bool-exclusion
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-is-true-false-strict
+language: zig
+severity: warning
+message: '[mechanical Zig port of is-true-false-strict] is True / is False identity check - use truthiness'
+metadata:
+  category: slop
+  source_python_rule: is-true-false-strict
+rule:
+  kind: binary_expression
+  any:
+    - pattern: '_EXPR == true'
+    - pattern: '_EXPR == false'
+    - pattern: '_EXPR != true'
+    - pattern: '_EXPR != false'
+
+---
+id: zig-bool-numeric-triple-guard
+language: zig
+severity: info
+message: '[mechanical Zig port of bool-numeric-triple-guard] isinstance bool guard combined with numeric isinstance - wrap in helper rather than inlining'
+metadata:
+  category: slop
+  source_python_rule: bool-numeric-triple-guard
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-mutual-isinstance-or-and
+language: zig
+severity: info
+message: '[mechanical Zig port of mutual-isinstance-or-and] `isinstance(a, T) or isinstance(b, T): return isinstance(a, T) and isinstance(b, T) and ...` - lift `type(a) is type(b) is T` or an early-return guard'
+metadata:
+  category: slop
+  source_python_rule: mutual-isinstance-or-and
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-duplicated-if-condition
+language: zig
+severity: warning
+message: '[mechanical Zig port of duplicated-if-condition] Same condition in `if` and `elif` - elif branch is unreachable, remove it'
+metadata:
+  category: slop
+  source_python_rule: duplicated-if-condition
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-isinstance-return-ladder
+language: zig
+severity: info
+message: '[mechanical Zig port of isinstance-return-ladder] `isinstance` ladder returning literals - use dispatch dict `{Type: value}[type(x)]` or polymorphism'
+metadata:
+  category: slop
+  source_python_rule: isinstance-return-ladder
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-min-max
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-min-max] Manual min/max `if a > b: m = a else: m = b` - use `m = max(a, b)` / `min(a, b)`'
+metadata:
+  category: slop
+  source_python_rule: manual-min-max
+rule:
+  kind: if_expression
+  regex: '[<>]=?[\s\S]*else'
+
+---
+id: zig-nested-if-no-else
+language: zig
+severity: info
+message: '[mechanical Zig port of nested-if-no-else] Nested `if` is the only statement in outer `if` body and neither has `else` - combine with `and` into a single condition'
+metadata:
+  category: slop
+  source_python_rule: nested-if-no-else
+rule:
+  kind: if_statement
+  all:
+    - has:
+        stopBy: end
+        kind: if_statement
+    - not:
+        has:
+          stopBy: neighbor
+          kind: else_clause
+
+---
+id: zig-nested-guard-invert
+language: zig
+severity: info
+message: '[mechanical Zig port of nested-guard-invert] Nested `if` early-exit guard with sibling code in outer `if` body - invert outer to early-exit (`if not outer: return/continue`) and flatten the nesting'
+metadata:
+  category: slop
+  source_python_rule: nested-guard-invert
+rule:
+  kind: if_statement
+  all:
+    - has:
+        stopBy: end
+        kind: if_statement
+    - not:
+        has:
+          stopBy: neighbor
+          kind: else_clause
+
+---
+id: zig-repeated-if-continue
+language: zig
+severity: info
+message: '[mechanical Zig port of repeated-if-continue] Multiple `if: continue` guards - combine with `or` or filter via comprehension'
+metadata:
+  category: slop
+  source_python_rule: repeated-if-continue
+rule:
+  kind: if_statement
+  all:
+    - follows:
+        stopBy: neighbor
+        kind: if_statement
+    - has:
+        stopBy: end
+        any:
+          - kind: return_expression
+          - kind: continue_expression
+          - kind: break_expression
+          - kind: builtin_function
+            regex: '^@panic\('
+
+---
+id: zig-repeated-if-return-error
+language: zig
+severity: info
+message: '[mechanical Zig port of repeated-if-return-error] Repeated `if: return error` checks - collect into one validator or raise'
+metadata:
+  category: slop
+  source_python_rule: repeated-if-return-error
+rule:
+  kind: if_statement
+  all:
+    - follows:
+        stopBy: neighbor
+        kind: if_statement
+    - has:
+        stopBy: end
+        any:
+          - kind: return_expression
+          - kind: continue_expression
+          - kind: break_expression
+          - kind: builtin_function
+            regex: '^@panic\('
+
+---
+id: zig-repeated-validation-calls
+language: zig
+severity: info
+message: '[mechanical Zig port of repeated-validation-calls] Repeated `validate_*()` calls - loop over a list of validators'
+metadata:
+  category: slop
+  source_python_rule: repeated-validation-calls
+rule:
+  kind: expression_statement
+  has:
+    kind: call_expression
+    regex: '\b(validate|verify)[A-Za-z0-9_]*\('
+  follows:
+    stopBy: neighbor
+    kind: expression_statement
+    has:
+      kind: call_expression
+      regex: '\b(validate|verify)[A-Za-z0-9_]*\('
+
+---
+id: zig-ternary-same-value
+language: zig
+severity: warning
+message: '[mechanical Zig port of ternary-same-value] `x if c else x` - both branches equal, drop the ternary'
+metadata:
+  category: slop
+  source_python_rule: ternary-same-value
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-repeated-function-or-chain
+language: zig
+severity: info
+message: '[mechanical Zig port of repeated-function-or-chain] `f(a) or f(b) or f(c) or f(d)` - use `any(f(x) for x in (a,b,c,d))`'
+metadata:
+  category: slop
+  source_python_rule: repeated-function-or-chain
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-value-compare-return-ladder
+language: zig
+severity: info
+message: '[mechanical Zig port of value-compare-return-ladder] `if x == v1: return r1 elif x == v2: ...` - use `{v1: r1, v2: r2}.get(x, default)`'
+metadata:
+  category: slop
+  source_python_rule: value-compare-return-ladder
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-repetitive-list-append-elif
+language: zig
+severity: info
+message: '[mechanical Zig port of repetitive-list-append-elif] `.append()` in each elif branch - compute value once then append, or dispatch'
+metadata:
+  category: slop
+  source_python_rule: repetitive-list-append-elif
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-boolean-return-if-else
+language: zig
+severity: info
+message: '[mechanical Zig port of boolean-return-if-else] `if c: return True else: return False` - use `return c` (or `return not c`)'
+metadata:
+  category: slop
+  source_python_rule: boolean-return-if-else
+rule:
+  kind: if_statement
+  regex: 'return\s+(true|false);[\s\S]*else[\s\S]*return\s+(false|true);'
+
+---
+id: zig-consecutive-if-same-variable
+language: zig
+severity: info
+message: '[mechanical Zig port of consecutive-if-same-variable] Consecutive `if` on same variable - use `elif` (or return early after first branch)'
+metadata:
+  category: slop
+  source_python_rule: consecutive-if-same-variable
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-nested-attribute-guard-chain
+language: zig
+severity: info
+message: '[mechanical Zig port of nested-attribute-guard-chain] Nested `if x: if x.y: if x.y.z:` - use try/except AttributeError, or extract a small helper'
+metadata:
+  category: slop
+  source_python_rule: nested-attribute-guard-chain
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-repeated-isinstance-validation
+language: zig
+severity: info
+message: '[mechanical Zig port of repeated-isinstance-validation] Repeated `if not isinstance(x, T): raise` - use type hints or a schema validator'
+metadata:
+  category: slop
+  source_python_rule: repeated-isinstance-validation
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-ternary-none-comparison
+language: zig
+severity: info
+message: '[mechanical Zig port of ternary-none-comparison] `v if x is None else o` - rewrite as `o if x is not None else v` for natural reading'
+metadata:
+  category: slop
+  source_python_rule: ternary-none-comparison
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-fetchone-none-check
+language: zig
+severity: info
+message: '[mechanical Zig port of fetchone-none-check] `row = cursor.fetchone(); if row is None:` - extract to `fetch_one_or_none()` helper'
+metadata:
+  category: slop
+  source_python_rule: fetchone-none-check
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-guard-return-none
+language: zig
+severity: info
+message: '[mechanical Zig port of guard-return-none] `if x is None: return None` followed by another `return` - drop guard, `None` flows naturally'
+metadata:
+  category: slop
+  source_python_rule: guard-return-none
+rule:
+  kind: if_statement
+  all:
+    - regex: '(==|!=)\s*null'
+    - has:
+        stopBy: end
+        any:
+          - kind: return_expression
+          - kind: continue_expression
+          - kind: break_expression
+          - kind: builtin_function
+            regex: '^@panic\('
+
+---
+id: zig-if-none-raise
+language: zig
+severity: info
+message: '[mechanical Zig port of if-none-raise] `if x is None: raise` - let natural `AttributeError`/`TypeError` surface, or enforce via type hint'
+metadata:
+  category: slop
+  source_python_rule: if-none-raise
+rule:
+  kind: if_statement
+  all:
+    - regex: '(==|!=)\s*null'
+    - has:
+        stopBy: end
+        any:
+          - kind: return_expression
+          - kind: continue_expression
+          - kind: break_expression
+          - kind: builtin_function
+            regex: '^@panic\('
+
+---
+id: zig-if-return-bool-else
+language: zig
+severity: info
+message: '[mechanical Zig port of if-return-bool-else] `if c: return True else: return False` - use `return bool(c)` or `return c`'
+metadata:
+  category: slop
+  source_python_rule: if-return-bool-else
+rule:
+  kind: if_statement
+  regex: 'return\s+(true|false);[\s\S]*else[\s\S]*return\s+(false|true);'
+
+---
+id: zig-unnecessary-elif
+language: zig
+severity: warning
+message: '[mechanical Zig port of unnecessary-elif] `elif` after `return`/`raise` - use plain `if` (previous branch exits, no fallthrough)'
+metadata:
+  category: slop
+  source_python_rule: unnecessary-elif
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-unnecessary-else-raise
+language: zig
+severity: warning
+message: '[mechanical Zig port of unnecessary-else-raise] `else` after `raise` - drop `else`, subsequent code runs only when no raise'
+metadata:
+  category: slop
+  source_python_rule: unnecessary-else-raise
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-and-return
+language: zig
+severity: info
+message: '[mechanical Zig port of verbose-and-return] `if not x: return False` - combine with later condition or `return x and ...`'
+metadata:
+  category: slop
+  source_python_rule: verbose-and-return
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-none-default
+language: zig
+severity: info
+message: '[mechanical Zig port of verbose-none-default] `if x is None: x = default` - use `x = x if x is not None else default`'
+metadata:
+  category: slop
+  source_python_rule: verbose-none-default
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-or-return
+language: zig
+severity: info
+message: '[mechanical Zig port of verbose-or-return] `if x: return True` - combine with later condition or `return x or ...`'
+metadata:
+  category: slop
+  source_python_rule: verbose-or-return
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-isinstance-return
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-isinstance-return] `if not isinstance(x, T): return err` - use type hints or a schema validator'
+metadata:
+  category: slop
+  source_python_rule: defensive-isinstance-return
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-if-return-same
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-if-return-same] `if x: return x` - use `return x or None` (or just `return x`)'
+metadata:
+  category: slop
+  source_python_rule: defensive-if-return-same
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-return-ternary-or-none
+language: zig
+severity: warning
+message: '[mechanical Zig port of return-ternary-or-none] `return x if x else None` - use `return x or None`'
+metadata:
+  category: slop
+  source_python_rule: return-ternary-or-none
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-if-pass-else-action
+language: zig
+severity: info
+message: '[mechanical Zig port of if-pass-else-action] `if c: pass else: ...` - invert to `if not c: ...`'
+metadata:
+  category: slop
+  source_python_rule: if-pass-else-action
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-or-empty
+language: zig
+severity: warning
+message: '[mechanical Zig port of defensive-or-empty] `x if x else []` - use `x or []`'
+metadata:
+  category: slop
+  source_python_rule: defensive-or-empty
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-redundant-guard-same-return
+language: zig
+severity: warning
+message: '[mechanical Zig port of redundant-guard-same-return] `if c: return r; return r` - drop the guard, both paths return the same value'
+metadata:
+  category: slop
+  source_python_rule: redundant-guard-same-return
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-duplicate-wrapper-return-branches
+language: zig
+severity: warning
+message: '[mechanical Zig port of duplicate-wrapper-return-branches] `if c: return f(a) else: return f(b)` - use `return f(a if c else b)`'
+metadata:
+  category: slop
+  source_python_rule: duplicate-wrapper-return-branches
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-conditional-same-target-append
+language: zig
+severity: warning
+message: '[mechanical Zig port of conditional-same-target-append] `if c: lst.append(a) else: lst.append(b)` - use `lst.append(a if c else b)`'
+metadata:
+  category: slop
+  source_python_rule: conditional-same-target-append
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-conditional-same-target-extend
+language: zig
+severity: warning
+message: '[mechanical Zig port of conditional-same-target-extend] `if c: lst.extend(a) else: lst.extend(b)` - use `lst.extend(a if c else b)`'
+metadata:
+  category: slop
+  source_python_rule: conditional-same-target-extend
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-conditional-same-target-subscript-assign
+language: zig
+severity: warning
+message: '[mechanical Zig port of conditional-same-target-subscript-assign] `if c: d[k] = a else: d[k] = b` - use `d[k] = a if c else b`'
+metadata:
+  category: slop
+  source_python_rule: conditional-same-target-subscript-assign
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-duplicate-wrapper-assign-branches
+language: zig
+severity: warning
+message: '[mechanical Zig port of duplicate-wrapper-assign-branches] `if c: x = f(a) else: x = f(b)` - use `x = f(a if c else b)`'
+metadata:
+  category: slop
+  source_python_rule: duplicate-wrapper-assign-branches
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-duplicate-tuple-return-branches
+language: zig
+severity: warning
+message: '[mechanical Zig port of duplicate-tuple-return-branches] `if c: return (a, b) else: return (x, b)` - use `return (a if c else x, b)`'
+metadata:
+  category: slop
+  source_python_rule: duplicate-tuple-return-branches
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-tail-predicate-chain
+language: zig
+severity: info
+message: '[mechanical Zig port of tail-predicate-chain] Consecutive `if not x: return False` before a final return - collapse to `return x and y and ...`'
+metadata:
+  category: slop
+  source_python_rule: tail-predicate-chain
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-duplicate-regex-return
+language: zig
+severity: warning
+message: '[mechanical Zig port of duplicate-regex-return] Multiple `re.search` returning same value - combine patterns with `|` or loop over a list'
+metadata:
+  category: slop
+  source_python_rule: duplicate-regex-return
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-lbyl-isfile-before-open
+language: zig
+severity: warning
+message: '[mechanical Zig port of lbyl-isfile-before-open] os.path.isfile guard before open is redundant and race-prone; use try/except OSError'
+metadata:
+  category: slop
+  source_python_rule: lbyl-isfile-before-open
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-stdout-or-if-stdout
+language: zig
+severity: warning
+message: '[mechanical Zig port of stdout-or-if-stdout] (x or '''') if x else '''' - the ''or'' branch already handles None'
+metadata:
+  category: slop
+  source_python_rule: stdout-or-if-stdout
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-double-guard-same-value
+language: zig
+severity: info
+message: '[mechanical Zig port of double-guard-same-value] `if not isinstance(x, T): raise` + `if not x: raise` - collapse to one guard (`or` the conditions or narrow via schema)'
+metadata:
+  category: slop
+  source_python_rule: double-guard-same-value
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-tuple-value-err-caller-unpack
+language: zig
+severity: info
+message: '[mechanical Zig port of tuple-value-err-caller-unpack] `v, err = f(...); if err: return err` - raise typed exceptions instead of Go-style `(value, err)` tuples'
+metadata:
+  category: slop
+  source_python_rule: tuple-value-err-caller-unpack
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-optional-param-self-getter-fallback
+language: zig
+severity: info
+message: '[mechanical Zig port of optional-param-self-getter-fallback] `x = x if x is not None else self.getter()` as a default - drop the optional param and read from `self` directly'
+metadata:
+  category: slop
+  source_python_rule: optional-param-self-getter-fallback
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-isinstance-then-bound-check
+language: zig
+severity: info
+message: '[mechanical Zig port of isinstance-then-bound-check] `if not isinstance(x, int): raise` + `if x < N: raise` - one validator (`ensure_positive_int`) or `Annotated[int, Ge(N)]`'
+metadata:
+  category: slop
+  source_python_rule: isinstance-then-bound-check
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-fstring-raise-heavy
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-fstring-raise-heavy] Function body has 3+ `raise ...(f''...{var}...'')` statements; dense per-field validation belongs at the boundary, not in a helper.'
+metadata:
+  category: slop
+  source_python_rule: defensive-fstring-raise-heavy
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-isinstance-raise-heavy
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-isinstance-raise-heavy] Function body runs 3+ `if not isinstance(...): raise` checks; these are boundary validations leaking into core logic.'
+metadata:
+  category: slop
+  source_python_rule: defensive-isinstance-raise-heavy
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-none-return-heavy
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-none-return-heavy] Function body has 3+ `if … is None: return None` / `if not …: return None` guards; plumbing `None` through helpers is defensive slop.'
+metadata:
+  category: slop
+  source_python_rule: defensive-none-return-heavy
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-try-soup-function
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-try-soup-function] Function body has 3+ `try/except` blocks — that is error-handling-as-control-flow. Rethink the contract or split the function.'
+metadata:
+  category: slop
+  source_python_rule: defensive-try-soup-function
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-except-exception-heavy
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-except-exception-heavy] Function body has 2+ `except Exception:` / bare `except:` clauses; catching-everything multiple times in one function is a paranoia smell.'
+metadata:
+  category: slop
+  source_python_rule: defensive-except-exception-heavy
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-validator-function
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-validator-function] Function body runs `if not isinstance(...): raise …` plus returns; this is a boundary validator living inside core logic. Validate once at the entrypoint, not per helper.'
+metadata:
+  category: slop
+  source_python_rule: defensive-validator-function
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-validator-returnmix
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-validator-returnmix] Function combines `isinstance` guards with `is None` guards and returns; stop per-field validation — assert the contract at the boundary.'
+metadata:
+  category: slop
+  source_python_rule: defensive-validator-returnmix
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-function-isinstance-heavy
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-function-isinstance-heavy] Function has 2+ `isinstance` checks in its body; inline type-policing is defensive slop. Validate at the boundary, then trust the type.'
+metadata:
+  category: slop
+  source_python_rule: defensive-function-isinstance-heavy
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-defensive-function-nullable-heavy
+language: zig
+severity: info
+message: '[mechanical Zig port of defensive-function-nullable-heavy] Function has 2+ `if … is None: return/raise` guards threaded through its body; normalize nullability at the boundary, don''t plumb `None`.'
+metadata:
+  category: slop
+  source_python_rule: defensive-function-nullable-heavy
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-type-probe-ladder
+language: zig
+severity: info
+message: '[mechanical Zig port of type-probe-ladder] Two `if isinstance(same_var, T): …` branches back-to-back are a type-probe ladder; use a dispatch table or polymorphism.'
+metadata:
+  category: slop
+  source_python_rule: type-probe-ladder
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-multi-none-or-chain
+language: zig
+severity: info
+message: '[mechanical Zig port of multi-none-or-chain] `if a is None or b is None [or c is None]: return/raise/continue` is defensive multi-arg null policing; normalize nullability at the boundary.'
+metadata:
+  category: slop
+  source_python_rule: multi-none-or-chain
+rule:
+  kind: if_statement
+  all:
+    - regex: '(==|!=)\s*null[\s\S]*(and|or)[\s\S]*(==|!=)\s*null'
+    - has:
+        stopBy: end
+        any:
+          - kind: return_expression
+          - kind: continue_expression
+          - kind: break_expression
+
+---
+id: zig-isinstance-guard-raise
+language: zig
+severity: info
+message: '[mechanical Zig port of isinstance-guard-raise] Inline `if not isinstance(x, T): raise …` guards police caller types in core logic; validate at the boundary and trust the type.'
+metadata:
+  category: slop
+  source_python_rule: isinstance-guard-raise
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-isinstance-return-constructor
+language: zig
+severity: info
+message: '[mechanical Zig port of isinstance-return-constructor] `if isinstance(x, T): return T(x)` re-wraps a value already of the target type; drop the guard and the wrap.'
+metadata:
+  category: slop
+  source_python_rule: isinstance-return-constructor
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-wrap-raise-fstring
+language: zig
+severity: info
+message: '[mechanical Zig port of wrap-raise-fstring] `except X as e: raise MyError(f''…: {e}'') from e` renames exceptions for cosmetics; let the original propagate or catch something specific.'
+metadata:
+  category: slop
+  source_python_rule: wrap-raise-fstring
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-except-return-static-sentinel
+language: zig
+severity: warning
+message: '[mechanical Zig port of except-return-static-sentinel] `except Exception: return None/False/[]/{}` is bare-exception-to-sentinel; catch something specific or let it propagate.'
+metadata:
+  category: slop
+  source_python_rule: except-return-static-sentinel
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-triple-attr-none-default-chain
+language: zig
+severity: info
+message: '[mechanical Zig port of triple-attr-none-default-chain] `x = data.get(k, d1) or d2` double-guards a `.get` miss; pick one default path.'
+metadata:
+  category: slop
+  source_python_rule: triple-attr-none-default-chain
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-redundant-coerce-to-str
+language: zig
+severity: info
+message: '[mechanical Zig port of redundant-coerce-to-str] `str(x) if x is not None else ''''` coerces a typed value; trust the annotation.'
+metadata:
+  category: slop
+  source_python_rule: redundant-coerce-to-str
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-none-continue-in-loop
+language: zig
+severity: info
+message: '[mechanical Zig port of none-continue-in-loop] `if x is None: continue` inside a loop is defensive null-skipping; filter at the source or raise on contract violation.'
+metadata:
+  category: slop
+  source_python_rule: none-continue-in-loop
+rule:
+  kind: if_statement
+  all:
+    - regex: '(==|!=)\s*null'
+    - has:
+        stopBy: end
+        any:
+          - kind: return_expression
+          - kind: continue_expression
+          - kind: break_expression
+          - kind: builtin_function
+            regex: '^@panic\('
+
+---
+id: zig-parse-and-fallback-exception
+language: zig
+severity: warning
+message: '[mechanical Zig port of parse-and-fallback-exception] `try: return int/float/json.loads(x) except Exception: return <default>` parse-with-silent-fallback swallows format errors.'
+metadata:
+  category: slop
+  source_python_rule: parse-and-fallback-exception
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-return-none-guard-ladder
+language: zig
+severity: info
+message: '[mechanical Zig port of return-none-guard-ladder] Back-to-back `if …: return None` guard clauses treat Optional as a pervasive escape hatch; normalize nullability at the boundary.'
+metadata:
+  category: slop
+  source_python_rule: return-none-guard-ladder
+rule:
+  kind: if_statement
+  all:
+    - follows:
+        stopBy: neighbor
+        kind: if_statement
+    - has:
+        stopBy: end
+        any:
+          - kind: return_expression
+          - kind: continue_expression
+          - kind: break_expression
+          - kind: builtin_function
+            regex: '^@panic\('
+
+---
+id: zig-raise-guard-ladder
+language: zig
+severity: info
+message: '[mechanical Zig port of raise-guard-ladder] Back-to-back `if <cond>: raise ...` guard clauses that raise different error messages are defensive input policing; push validation to the boundary.'
+metadata:
+  category: slop
+  source_python_rule: raise-guard-ladder
+rule:
+  kind: if_statement
+  all:
+    - follows:
+        stopBy: neighbor
+        kind: if_statement
+    - has:
+        stopBy: end
+        any:
+          - kind: return_expression
+          - kind: continue_expression
+          - kind: break_expression
+          - kind: builtin_function
+            regex: '^@panic\('
+
+---
+id: zig-function-with-many-type-guards
+language: zig
+severity: info
+message: '[mechanical Zig port of function-with-many-type-guards] Function has 3+ `if not isinstance / if x is None: raise` guard clauses before doing work; validate at the boundary and trust the type downstream.'
+metadata:
+  category: slop
+  source_python_rule: function-with-many-type-guards
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-sentinel-fallback-function
+language: zig
+severity: warning
+message: '[mechanical Zig port of sentinel-fallback-function] Whole-function `try: <work>; except Exception: return None/False/[]/{}` swallows every error and returns a sentinel; catch specifically or let it propagate.'
+metadata:
+  category: slop
+  source_python_rule: sentinel-fallback-function
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dispatch-by-string-equality
+language: zig
+severity: info
+message: '[mechanical Zig port of dispatch-by-string-equality] Long `if op == \"X\":` / `elif op == \"Y\":` string-equality dispatch is open-coded command routing; use a `{name: handler}` table.'
+metadata:
+  category: slop
+  source_python_rule: dispatch-by-string-equality
+rule:
+  kind: if_statement
+  regex: '==\s*"[^"]+"[\s\S]*else'
+
+---
+id: zig-go-style-err-tuple-return
+language: zig
+severity: info
+message: '[mechanical Zig port of go-style-err-tuple-return] `return None, error_msg` / `return None, None` Go-style dual-return open-codes an ad-hoc result type; raise exceptions or use a real result object.'
+metadata:
+  category: slop
+  source_python_rule: go-style-err-tuple-return
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-len-arity-raise
+language: zig
+severity: info
+message: '[mechanical Zig port of len-arity-raise] `if len(args) != N: raise …` open-codes arity checks; bind via parameters or `*args` unpacking so the error is structural.'
+metadata:
+  category: slop
+  source_python_rule: len-arity-raise
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-chained-dict-get
+language: zig
+severity: info
+message: '[mechanical Zig port of chained-dict-get] `.get().get()` chain - extract helper or use `operator.itemgetter` / try-except KeyError'
+metadata:
+  category: slop
+  source_python_rule: chained-dict-get
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-repeated-dict-key-assignment
+language: zig
+severity: info
+message: '[mechanical Zig port of repeated-dict-key-assignment] Repeated `d[k] = f(...)` lines - use a loop or dict comprehension'
+metadata:
+  category: slop
+  source_python_rule: repeated-dict-key-assignment
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dict-get-zero-default
+language: zig
+severity: info
+message: '[mechanical Zig port of dict-get-zero-default] `d.get(k, 0)` - use a defaultdict(int) instead or a try/except KeyError guard.'
+metadata:
+  category: slop
+  source_python_rule: dict-get-zero-default
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dict-get-empty-string-default
+language: zig
+severity: info
+message: '[mechanical Zig port of dict-get-empty-string-default] `x = d.get(k, ''''); if x:` - conflates missing key with empty value; use `.get(k)` and `is not None`'
+metadata:
+  category: slop
+  source_python_rule: dict-get-empty-string-default
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dict-get-empty-list-default
+language: zig
+severity: info
+message: '[mechanical Zig port of dict-get-empty-list-default] `d.get(k, [])` - builds a fresh list each call; use `d.setdefault(k, [])` or `defaultdict(list)`'
+metadata:
+  category: slop
+  source_python_rule: dict-get-empty-list-default
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dict-get-empty-dict-default
+language: zig
+severity: info
+message: '[mechanical Zig port of dict-get-empty-dict-default] `d.get(k, {})` - builds a fresh dict each call; use `d.setdefault(k, {})` or `defaultdict(dict)`'
+metadata:
+  category: slop
+  source_python_rule: dict-get-empty-dict-default
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dict-get-default-none
+language: zig
+severity: warning
+message: '[mechanical Zig port of dict-get-default-none] `d.get(k, None)` - drop the `None`, it is already the default'
+metadata:
+  category: slop
+  source_python_rule: dict-get-default-none
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-check-key-in-dict-keys
+language: zig
+severity: warning
+message: '[mechanical Zig port of check-key-in-dict-keys] `k in d.keys()` - use `k in d`'
+metadata:
+  category: slop
+  source_python_rule: check-key-in-dict-keys
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-list-dict-keys
+language: zig
+severity: warning
+message: '[mechanical Zig port of list-dict-keys] `list(d.keys())` - use `list(d)`'
+metadata:
+  category: slop
+  source_python_rule: list-dict-keys
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-dict-setdefault
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-dict-setdefault] `if k not in d: d[k] = v` - use `d.setdefault(k, v)`'
+metadata:
+  category: slop
+  source_python_rule: manual-dict-setdefault
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-dict-key-access
+language: zig
+severity: info
+message: '[mechanical Zig port of verbose-dict-key-access] `if k in d: v = d[k]` - use `v = d.get(k)` (or `d.get(k, default)`)'
+metadata:
+  category: slop
+  source_python_rule: verbose-dict-key-access
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-dict-update
+language: zig
+severity: info
+message: '[mechanical Zig port of verbose-dict-update] Single-statement `d[k] = v` loop - use `{k: v for ... in ...}` comprehension'
+metadata:
+  category: slop
+  source_python_rule: verbose-dict-update
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-dict-elif-updates
+language: zig
+severity: info
+message: '[mechanical Zig port of verbose-dict-elif-updates] `d[k] = v` in each if/elif branch - use a dispatch `{cond: (k, v)}` or helper'
+metadata:
+  category: slop
+  source_python_rule: verbose-dict-elif-updates
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-dict-iteration
+language: zig
+severity: warning
+message: '[mechanical Zig port of verbose-dict-iteration] `for k in d.keys()` - use `for k in d`'
+metadata:
+  category: slop
+  source_python_rule: verbose-dict-iteration
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-items-unused-value
+language: zig
+severity: warning
+message: '[mechanical Zig port of items-unused-value] `for k, _ in d.items()` - use `for k in d`'
+metadata:
+  category: slop
+  source_python_rule: items-unused-value
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-items-unused-key
+language: zig
+severity: warning
+message: '[mechanical Zig port of items-unused-key] `for _, v in d.items()` - use `for v in d.values()`'
+metadata:
+  category: slop
+  source_python_rule: items-unused-key
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-dict-get-assign
+language: zig
+severity: warning
+message: '[mechanical Zig port of manual-dict-get-assign] `if k in d: v = d[k] else: v = default` - use `v = d.get(k, default)`'
+metadata:
+  category: slop
+  source_python_rule: manual-dict-get-assign
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-dict-counter-if-else
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-dict-counter-if-else] Manual dict counter - use `d[k] = d.get(k, 0) + 1` or `collections.Counter(iterable)`'
+metadata:
+  category: slop
+  source_python_rule: manual-dict-counter-if-else
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-sorted-dict-keys-wrap
+language: zig
+severity: warning
+message: '[mechanical Zig port of sorted-dict-keys-wrap] `sorted(d.keys())` - use `sorted(d)`'
+metadata:
+  category: slop
+  source_python_rule: sorted-dict-keys-wrap
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-sorted-key-indexed-dict-comprehension
+language: zig
+severity: warning
+message: '[mechanical Zig port of sorted-key-indexed-dict-comprehension] `{k: d[k] for k in sorted(d.keys())}` - use `dict(sorted(d.items()))`'
+metadata:
+  category: slop
+  source_python_rule: sorted-key-indexed-dict-comprehension
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dict-comprehension-from-keys
+language: zig
+severity: info
+message: '[mechanical Zig port of dict-comprehension-from-keys] `dict.fromkeys(keys, val)` - use `{k: val for k in keys}` (and never with a mutable `val`, it is shared)'
+metadata:
+  category: slop
+  source_python_rule: dict-comprehension-from-keys
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dict-get-default-inside-keyerror-try
+language: zig
+severity: warning
+message: '[mechanical Zig port of dict-get-default-inside-keyerror-try] `d.get(k, default)` inside `try/except KeyError` - the default is unreachable; drop it or drop the except'
+metadata:
+  category: slop
+  source_python_rule: dict-get-default-inside-keyerror-try
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-deep-dict-access
+language: zig
+severity: info
+message: '[mechanical Zig port of deep-dict-access] 4+ levels of `d[a][b][c][d]` - use a dataclass or `operator.itemgetter`'
+metadata:
+  category: slop
+  source_python_rule: deep-dict-access
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-get-then-none-check
+language: zig
+severity: info
+message: '[mechanical Zig port of get-then-none-check] `v = d.get(k); if v is None:` - use `if k in d:` or try/except KeyError'
+metadata:
+  category: slop
+  source_python_rule: get-then-none-check
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-init-populate-iterate-dict
+language: zig
+severity: info
+message: '[mechanical Zig port of init-populate-iterate-dict] Create-populate-iterate `$DICT` - use `{k: v for ...}` or skip the intermediate dict'
+metadata:
+  category: slop
+  source_python_rule: init-populate-iterate-dict
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-sorted-items-default-key
+language: zig
+severity: warning
+message: '[mechanical Zig port of sorted-items-default-key] sorted(..., key=lambda i: i[0]) / `(i[0], i[1])` - default sort already matches; drop the key'
+metadata:
+  category: slop
+  source_python_rule: sorted-items-default-key
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-identity-dict-comprehension
+language: zig
+severity: warning
+message: '[mechanical Zig port of identity-dict-comprehension] {k: v for k, v in d.items()} is just dict(d)'
+metadata:
+  category: slop
+  source_python_rule: identity-dict-comprehension
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dict-from-pairs-loop
+language: zig
+severity: warning
+message: '[mechanical Zig port of dict-from-pairs-loop] `for k, v in pairs: d[k] = v` - use `d = dict(pairs)` (or `d.update(pairs)` if merging)'
+metadata:
+  category: slop
+  source_python_rule: dict-from-pairs-loop
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-update-if-present-dict
+language: zig
+severity: info
+message: '[mechanical Zig port of update-if-present-dict] `if x is not None: updates[k] = x` for each arg - drop the optional defaulting or pass `**kwargs` through'
+metadata:
+  category: slop
+  source_python_rule: update-if-present-dict
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-comprehension-used-but-ignored-result
+language: zig
+severity: warning
+message: '[mechanical Zig port of comprehension-used-but-ignored-result] Comprehension result discarded - use a `for` loop for side effects'
+metadata:
+  category: slop
+  source_python_rule: comprehension-used-but-ignored-result
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-for-range-len
+language: zig
+severity: warning
+message: '[mechanical Zig port of for-range-len] `for i in range(len(x))` - use `enumerate(x)` or iterate `x` directly'
+metadata:
+  category: slop
+  source_python_rule: for-range-len
+rule:
+  kind: for_statement
+  regex: 'for\s*\(\s*0\.\.[A-Za-z0-9_.*()]+\.len\s*\)'
+
+---
+id: zig-unnecessary-list-call
+language: zig
+severity: warning
+message: '[mechanical Zig port of unnecessary-list-call] `for x in list(iterable)` - drop `list()`, `for` iterates directly'
+metadata:
+  category: slop
+  source_python_rule: unnecessary-list-call
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-list-map-filter
+language: zig
+severity: info
+message: '[mechanical Zig port of list-map-filter] `list(map(f, xs))` / `list(filter(p, xs))` - use a list comprehension'
+metadata:
+  category: slop
+  source_python_rule: list-map-filter
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-listcomp-in-builtin-call
+language: zig
+severity: warning
+message: '[mechanical Zig port of listcomp-in-builtin-call] `all/any/sum/set/dict([...])` - drop brackets for a generator expression'
+metadata:
+  category: slop
+  source_python_rule: listcomp-in-builtin-call
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-membership-test-list-literal
+language: zig
+severity: info
+message: '[mechanical Zig port of membership-test-list-literal] `x in [a, b, c, d]` - use a set literal `{a, b, c, d}` for O(1) lookup'
+metadata:
+  category: slop
+  source_python_rule: membership-test-list-literal
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-list-wrap-list
+language: zig
+severity: warning
+message: '[mechanical Zig port of list-wrap-list] `list([a, b, c])` is redundant - just use `[a, b, c]`'
+metadata:
+  category: slop
+  source_python_rule: list-wrap-list
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-set-literal-list
+language: zig
+severity: warning
+message: '[mechanical Zig port of set-literal-list] `set([a, b, c])` - use set literal `{a, b, c}`'
+metadata:
+  category: slop
+  source_python_rule: set-literal-list
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-list-self-concat
+language: zig
+severity: warning
+message: '[mechanical Zig port of list-self-concat] `lst = lst + [x]` - use `lst.append(x)` (avoids copying the whole list)'
+metadata:
+  category: slop
+  source_python_rule: list-self-concat
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-list-extend-from-loop
+language: zig
+severity: warning
+message: '[mechanical Zig port of list-extend-from-loop] `for x in it: lst.append(x)` - use `lst.extend(it)`'
+metadata:
+  category: slop
+  source_python_rule: list-extend-from-loop
+rule:
+  kind: for_statement
+  has:
+    stopBy: end
+    kind: call_expression
+    regex: '\.(append|appendAssumeCapacity|appendSlice|put|insert)\('
+
+---
+id: zig-join-list-literal
+language: zig
+severity: warning
+message: '[mechanical Zig port of join-list-literal] `''''.join([...])` materializes a list first - pass the iterable directly'
+metadata:
+  category: slop
+  source_python_rule: join-list-literal
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-join-list-comprehension
+language: zig
+severity: warning
+message: '[mechanical Zig port of join-list-comprehension] `''''.join([x for ...])` - drop brackets for a generator expression'
+metadata:
+  category: slop
+  source_python_rule: join-list-comprehension
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-sum-loop
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-sum-loop] `total = 0; for x in it: total += expr` - use `sum(expr for x in it)`'
+metadata:
+  category: slop
+  source_python_rule: manual-sum-loop
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-count-loop
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-count-loop] `count = 0; for x in it: count += 1` - use `sum(1 for x in it if cond)`'
+metadata:
+  category: slop
+  source_python_rule: manual-count-loop
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-set-add-loop
+language: zig
+severity: info
+message: '[mechanical Zig port of set-add-loop] `for x in it: s.add(v)` - use set comprehension `{v for x in it}`'
+metadata:
+  category: slop
+  source_python_rule: set-add-loop
+rule:
+  kind: for_statement
+  has:
+    stopBy: end
+    kind: call_expression
+    regex: '\.(append|appendAssumeCapacity|appendSlice|put|insert)\('
+
+---
+id: zig-sorted-list-comprehension-wrap
+language: zig
+severity: warning
+message: '[mechanical Zig port of sorted-list-comprehension-wrap] `sorted([x for ...])` - drop brackets for generator expression `sorted(x for ...)`'
+metadata:
+  category: slop
+  source_python_rule: sorted-list-comprehension-wrap
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-set-generator-wrap
+language: zig
+severity: warning
+message: '[mechanical Zig port of set-generator-wrap] `set(x for x in it)` - use set comprehension `{x for x in it}`'
+metadata:
+  category: slop
+  source_python_rule: set-generator-wrap
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-redundant-list-comprehension
+language: zig
+severity: warning
+message: '[mechanical Zig port of redundant-list-comprehension] `[x for x in iter]` - use `list(iter)`'
+metadata:
+  category: slop
+  source_python_rule: redundant-list-comprehension
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-consecutive-append-calls
+language: zig
+severity: info
+message: '[mechanical Zig port of consecutive-append-calls] Consecutive `.append()` calls - use `.extend([a, b, c])`'
+metadata:
+  category: slop
+  source_python_rule: consecutive-append-calls
+rule:
+  kind: expression_statement
+  has:
+    kind: call_expression
+    regex: '\.(append|appendAssumeCapacity|appendSlice)\('
+  follows:
+    stopBy: neighbor
+    kind: expression_statement
+    has:
+      kind: call_expression
+      regex: '\.(append|appendAssumeCapacity|appendSlice)\('
+
+---
+id: zig-verbose-list-append-loop
+language: zig
+severity: info
+message: '[mechanical Zig port of verbose-list-append-loop] Single-statement append loop - use `[expr for ... in ...]` comprehension'
+metadata:
+  category: slop
+  source_python_rule: verbose-list-append-loop
+rule:
+  kind: for_statement
+  has:
+    stopBy: end
+    kind: call_expression
+    regex: '\.(append|appendAssumeCapacity|appendSlice|put|insert)\('
+
+---
+id: zig-init-populate-iterate-list
+language: zig
+severity: info
+message: '[mechanical Zig port of init-populate-iterate-list] Create-append-iterate `$LIST` - use `[expr for ...]` or skip the intermediate list'
+metadata:
+  category: slop
+  source_python_rule: init-populate-iterate-list
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-materialize-then-sort-return
+language: zig
+severity: info
+message: '[mechanical Zig port of materialize-then-sort-return] `tmp = [...]; return sorted(tmp)` - use `return sorted(x for ... in ...)`'
+metadata:
+  category: slop
+  source_python_rule: materialize-then-sort-return
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-find-return-none
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-find-return-none] `for x in it: if c: return r; return None` - use `next((r for x in it if c), None)`'
+metadata:
+  category: slop
+  source_python_rule: manual-find-return-none
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-missing-remove-loop
+language: zig
+severity: info
+message: '[mechanical Zig port of verbose-missing-remove-loop] Copy-list-then-remove to find missing items - use `set(required) - set(target)`'
+metadata:
+  category: slop
+  source_python_rule: verbose-missing-remove-loop
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-frozenset-list-wrap
+language: zig
+severity: warning
+message: '[mechanical Zig port of frozenset-list-wrap] `frozenset([...])` - pass the iterable directly, drop the list'
+metadata:
+  category: slop
+  source_python_rule: frozenset-list-wrap
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-range-zero-start
+language: zig
+severity: warning
+message: '[mechanical Zig port of verbose-range-zero-start] `range(0, n)` - use `range(n)`, `0` is the default start'
+metadata:
+  category: slop
+  source_python_rule: verbose-range-zero-start
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-sorted-list
+language: zig
+severity: warning
+message: '[mechanical Zig port of verbose-sorted-list] `sorted(list(x))` - use `sorted(x)`, it already returns a new list'
+metadata:
+  category: slop
+  source_python_rule: verbose-sorted-list
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-redundant-continue
+language: zig
+severity: warning
+message: '[mechanical Zig port of redundant-continue] `continue` at end of loop body - delete it, the loop iterates anyway'
+metadata:
+  category: slop
+  source_python_rule: redundant-continue
+rule:
+  kind: block
+  regex: 'continue;\s*}'
+  inside:
+    any:
+      - kind: for_statement
+      - kind: while_statement
+
+---
+id: zig-long-tuple-unpacking
+language: zig
+severity: info
+message: '[mechanical Zig port of long-tuple-unpacking] Unpacking 5+ values from a tuple - use a `NamedTuple` or `@dataclass`'
+metadata:
+  category: slop
+  source_python_rule: long-tuple-unpacking
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-index-unpack
+language: zig
+severity: warning
+message: '[mechanical Zig port of manual-index-unpack] `a = pair[0]; b = pair[1]` - use tuple unpacking `a, b = pair`'
+metadata:
+  category: slop
+  source_python_rule: manual-index-unpack
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-split-magic-index
+language: zig
+severity: info
+message: '[mechanical Zig port of split-magic-index] `s.split()[N]` with magic index - unpack into named vars (`a, b, c = s.split()`)'
+metadata:
+  category: slop
+  source_python_rule: split-magic-index
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-slice-assign-listcomp-self
+language: zig
+severity: info
+message: '[mechanical Zig port of slice-assign-listcomp-self] `lst[:] = [.. for .. in lst]` mutates a list while reading it - prefer assigning a new list unless in-place mutation is required'
+metadata:
+  category: slop
+  source_python_rule: slice-assign-listcomp-self
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-redundant-blank-check
+language: zig
+severity: info
+message: '[mechanical Zig port of redundant-blank-check] `line.isspace() or not line` then `line.strip()` `if not text` - one `if not line.strip(): continue` is enough'
+metadata:
+  category: slop
+  source_python_rule: redundant-blank-check
+rule:
+  kind: binary_expression
+  any:
+    - pattern: '_X.len == 0'
+    - pattern: '_X.len != 0'
+    - pattern: '_X.len > 0'
+    - pattern: '_X.len >= 1'
+    - pattern: '_X.len < 1'
+
+---
+id: zig-manual-set-union-loop
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-set-union-loop] `s = set(); for r in it: s.update(r.X())` - use `set().union(*(r.X() for r in it))` or a comprehension'
+metadata:
+  category: slop
+  source_python_rule: manual-set-union-loop
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-fixed-chunk-file-hash
+language: zig
+severity: warning
+message: '[mechanical Zig port of fixed-chunk-file-hash] `while True: chunk = f.read(N); if not chunk: break; h.update(chunk)` - use `hashlib.file_digest(f, ALGO)`'
+metadata:
+  category: slop
+  source_python_rule: fixed-chunk-file-hash
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-pointless-lambda-call
+language: zig
+severity: warning
+message: '[mechanical Zig port of pointless-lambda-call] Immediately-invoked lambda `(lambda: ...)()` - inline the expression'
+metadata:
+  category: slop
+  source_python_rule: pointless-lambda-call
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-unnecessary-lambda
+language: zig
+severity: warning
+message: '[mechanical Zig port of unnecessary-lambda] `lambda x: f(x)` - pass `f` directly'
+metadata:
+  category: slop
+  source_python_rule: unnecessary-lambda
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-empty-init
+language: zig
+severity: warning
+message: '[mechanical Zig port of empty-init] Empty `__init__` - delete it, Python provides a default constructor'
+metadata:
+  category: slop
+  source_python_rule: empty-init
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-redundant-return-none
+language: zig
+severity: info
+message: '[mechanical Zig port of redundant-return-none] `return None` at end of function - drop it, `None` returns implicitly'
+metadata:
+  category: slop
+  source_python_rule: redundant-return-none
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-swallow-exception-pass-multi-stmt
+language: zig
+severity: warning
+message: '[mechanical Zig port of swallow-exception-pass-multi-stmt] `except ...: pass` after multi-step work hides real failures; catch specific errors or log'
+metadata:
+  category: slop
+  source_python_rule: swallow-exception-pass-multi-stmt
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-tokenizer-char-append-branch
+language: zig
+severity: info
+message: '[mechanical Zig port of tokenizer-char-append-branch] Per-char tokenizer branches with `append` + `pos += 1` - use `{char: TokenType}` lookup table'
+metadata:
+  category: slop
+  source_python_rule: tokenizer-char-append-branch
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-except-bare-reraise
+language: zig
+severity: warning
+message: '[mechanical Zig port of except-bare-reraise] Catching an exception only to re-raise it adds noise; drop the try/except'
+metadata:
+  category: slop
+  source_python_rule: except-bare-reraise
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-except-pass-silence
+language: zig
+severity: warning
+message: '[mechanical Zig port of except-pass-silence] except clause with bare pass silently swallows errors'
+metadata:
+  category: slop
+  source_python_rule: except-pass-silence
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-except-oserror-ioerror-pair
+language: zig
+severity: warning
+message: '[mechanical Zig port of except-oserror-ioerror-pair] IOError is an alias for OSError since Py3.3; drop the pair'
+metadata:
+  category: slop
+  source_python_rule: except-oserror-ioerror-pair
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-pragma-no-cover-defensive
+language: zig
+severity: info
+message: '[mechanical Zig port of pragma-no-cover-defensive] pragma no cover suppresses coverage on dead branches; remove the branch instead'
+metadata:
+  category: slop
+  source_python_rule: pragma-no-cover-defensive
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-per-method-assert-not-none
+language: zig
+severity: info
+message: '[mechanical Zig port of per-method-assert-not-none] assert self.X is not None at method entry - enforce in __init__ once'
+metadata:
+  category: slop
+  source_python_rule: per-method-assert-not-none
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-del-unused-param
+language: zig
+severity: warning
+message: '[mechanical Zig port of del-unused-param] del on a named parameter inside a function silences unused-param lint - drop from signature'
+metadata:
+  category: slop
+  source_python_rule: del-unused-param
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-wrapper-isvalid-oneliner
+language: zig
+severity: info
+message: '[mechanical Zig port of wrapper-isvalid-oneliner] One-line is_valid_X wrapping a regex match/search/fullmatch adds no value'
+metadata:
+  category: slop
+  source_python_rule: wrapper-isvalid-oneliner
+rule:
+  kind: function_declaration
+  regex: '^\s*(pub\s+)?(inline\s+)?fn\s+[A-Za-z_][A-Za-z0-9_]*[\s\S]*return\s+[A-Za-z_][A-Za-z0-9_.]*\([^;{}]*\);\s*}'
+
+---
+id: zig-manual-removeprefix-replace
+language: zig
+severity: warning
+message: '[mechanical Zig port of manual-removeprefix-replace] s.replace(p, '''') if s.startswith(p) else s - use str.removeprefix'
+metadata:
+  category: slop
+  source_python_rule: manual-removeprefix-replace
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-section-banner-comment
+language: zig
+severity: info
+message: '[mechanical Zig port of section-banner-comment] Decorative section banner comment - delete, let structure speak for itself'
+metadata:
+  category: slop
+  source_python_rule: section-banner-comment
+rule:
+  kind: comment
+  regex: '^//\s*[-=─]{10,}\s*$'
+
+---
+id: zig-dataclass-count-explosion
+language: zig
+severity: info
+message: '[mechanical Zig port of dataclass-count-explosion] @dataclass decorator - 10+ in one file suggests TypedDict or consolidation target'
+metadata:
+  category: slop
+  source_python_rule: dataclass-count-explosion
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dataclass-few-attributes
+language: zig
+severity: info
+message: '[mechanical Zig port of dataclass-few-attributes] @dataclass with <=2 scalar attributes - use a NamedTuple or tuple unless you need mutability'
+metadata:
+  category: slop
+  source_python_rule: dataclass-few-attributes
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-dataclass-tagged-union-discriminator
+language: zig
+severity: info
+message: '[mechanical Zig port of dataclass-tagged-union-discriminator] @dataclass with `kind: str` + multiple Optional fields - model as distinct types or a Literal discriminator'
+metadata:
+  category: slop
+  source_python_rule: dataclass-tagged-union-discriminator
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-empty-exception-subclass
+language: zig
+severity: info
+message: '[mechanical Zig port of empty-exception-subclass] Empty Error/Exception/Warning subclass - use one base error and pass context in the message'
+metadata:
+  category: slop
+  source_python_rule: empty-exception-subclass
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-identity-wrapper-function
+language: zig
+severity: info
+message: '[mechanical Zig port of identity-wrapper-function] `def f(x): return g(x)` - identity wrapper adds no value; call the inner function directly'
+metadata:
+  category: slop
+  source_python_rule: identity-wrapper-function
+rule:
+  kind: function_declaration
+  regex: '^\s*(pub\s+)?(inline\s+)?fn\s+[A-Za-z_][A-Za-z0-9_]*[\s\S]*return\s+[A-Za-z_][A-Za-z0-9_.]*\([^;{}]*\);\s*}'
+
+---
+id: zig-predicate-isinstance-wrapper
+language: zig
+severity: info
+message: '[mechanical Zig port of predicate-isinstance-wrapper] `def is_X(v) -> bool: return isinstance(v, T)` - inline the isinstance check; the wrapper adds no value'
+metadata:
+  category: slop
+  source_python_rule: predicate-isinstance-wrapper
+rule:
+  kind: function_declaration
+  regex: '^\s*(pub\s+)?(inline\s+)?fn\s+[A-Za-z_][A-Za-z0-9_]*[\s\S]*return\s+[A-Za-z_][A-Za-z0-9_.]*\([^;{}]*\);\s*}'
+
+---
+id: zig-lambda-generator-throw
+language: zig
+severity: warning
+message: '[mechanical Zig port of lambda-generator-throw] `(_ for _ in ()).throw(...)` - raise inside a lambda via generator hack; use `def helper(): raise ...`'
+metadata:
+  category: slop
+  source_python_rule: lambda-generator-throw
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-oswalk-relpath-sep-replace
+language: zig
+severity: info
+message: '[mechanical Zig port of oswalk-relpath-sep-replace] `os.walk` + `os.path.relpath` + `.replace(os.sep, ''/'')` - use `Path(root).rglob(''*'')` and `.relative_to(root).as_posix()`'
+metadata:
+  category: slop
+  source_python_rule: oswalk-relpath-sep-replace
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-generic-with-any
+language: zig
+severity: info
+message: '[mechanical Zig port of generic-with-any] `<Container>[..., Any, ...]` - specify concrete element types or use a `TypedDict`/`@dataclass`/`Protocol`'
+metadata:
+  category: slop
+  source_python_rule: generic-with-any
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-union-with-any
+language: zig
+severity: warning
+message: '[mechanical Zig port of union-with-any] `Union[..., Any]` / `... | Any` - drop `Any`, it subsumes every other member'
+metadata:
+  category: slop
+  source_python_rule: union-with-any
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-optional-any
+language: zig
+severity: warning
+message: '[mechanical Zig port of optional-any] `Optional[Any]` / `Any | None` - reduces to `Any`; drop the wrapper'
+metadata:
+  category: slop
+  source_python_rule: optional-any
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-callable-any-return
+language: zig
+severity: info
+message: '[mechanical Zig port of callable-any-return] `Callable[..., Any]` - specify the return type; `...` already erases the parameter signature'
+metadata:
+  category: slop
+  source_python_rule: callable-any-return
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-object-type-annotation
+language: zig
+severity: info
+message: '[mechanical Zig port of object-type-annotation] `object` annotation - use a concrete type, `Protocol`, or `Any`'
+metadata:
+  category: slop
+  source_python_rule: object-type-annotation
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-legacy-typing-capitalized-imports
+language: zig
+severity: warning
+message: '[mechanical Zig port of legacy-typing-capitalized-imports] Deprecated `typing` import - use built-ins (list/dict/tuple/set/type), `collections.*`, or `X | Y` / `X | None` (PEP 585/604)'
+metadata:
+  category: slop
+  source_python_rule: legacy-typing-capitalized-imports
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-str-join
+language: zig
+severity: warning
+message: '[mechanical Zig port of manual-str-join] building a string with `+=` in a loop - collect parts in a list then `''''.join(parts)`'
+metadata:
+  category: slop
+  source_python_rule: manual-str-join
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-json-dumps-then-loads
+language: zig
+severity: warning
+message: '[mechanical Zig port of json-dumps-then-loads] `json.loads(json.dumps(x))` - use `copy.deepcopy(x)`'
+metadata:
+  category: slop
+  source_python_rule: json-dumps-then-loads
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-json-loads-read
+language: zig
+severity: warning
+message: '[mechanical Zig port of json-loads-read] `json.loads(f.read())` - use `json.load(f)`'
+metadata:
+  category: slop
+  source_python_rule: json-loads-read
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-int-float-coerce
+language: zig
+severity: warning
+message: '[mechanical Zig port of int-float-coerce] `int(float(x))` - parse once or validate input format (mis-handles strings like `''1e2''`)'
+metadata:
+  category: slop
+  source_python_rule: int-float-coerce
+rule:
+  kind: builtin_function
+  any:
+    - pattern: '@as(_T, @as(_U, _X))'
+    - pattern: '@intFromFloat(@floatFromInt(_X))'
+    - pattern: '@floatFromInt(@intFromFloat(_X))'
+    - pattern: '@intCast(@as(_T, _X))'
+
+---
+id: zig-unnecessary-cast-str
+language: zig
+severity: warning
+message: '[mechanical Zig port of unnecessary-cast-str] `str(''x'')` - string literal is already a string'
+metadata:
+  category: slop
+  source_python_rule: unnecessary-cast-str
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-redundant-str-in-fstring
+language: zig
+severity: warning
+message: '[mechanical Zig port of redundant-str-in-fstring] `f''{str(x)}''` - use `f''{x}''`, f-strings auto-convert'
+metadata:
+  category: slop
+  source_python_rule: redundant-str-in-fstring
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-type-conversion-chain
+language: zig
+severity: warning
+message: '[mechanical Zig port of verbose-type-conversion-chain] Chained type conversions like `str(int(x))` - parse once or validate input format'
+metadata:
+  category: slop
+  source_python_rule: verbose-type-conversion-chain
+rule:
+  kind: builtin_function
+  any:
+    - pattern: '@as(_T, @as(_U, _X))'
+    - pattern: '@intFromFloat(@floatFromInt(_X))'
+    - pattern: '@floatFromInt(@intFromFloat(_X))'
+    - pattern: '@intCast(@as(_T, _X))'
+
+---
+id: zig-double-conversion-int-float
+language: zig
+severity: warning
+message: '[mechanical Zig port of double-conversion-int-float] `int(float(x))` - parse directly or validate input (mis-handles `''1e2''`, `''1.5''`)'
+metadata:
+  category: slop
+  source_python_rule: double-conversion-int-float
+rule:
+  kind: builtin_function
+  any:
+    - pattern: '@as(_T, @as(_U, _X))'
+    - pattern: '@intFromFloat(@floatFromInt(_X))'
+    - pattern: '@floatFromInt(@intFromFloat(_X))'
+    - pattern: '@intCast(@as(_T, _X))'
+
+---
+id: zig-verbose-string-concat-str
+language: zig
+severity: warning
+message: '[mechanical Zig port of verbose-string-concat-str] `str(x) + str(y)` - use `f''{x}{y}''`'
+metadata:
+  category: slop
+  source_python_rule: verbose-string-concat-str
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-verbose-string-literal-plus-str
+language: zig
+severity: warning
+message: '[mechanical Zig port of verbose-string-literal-plus-str] `''...'' + str(x)` - use `f''...{x}''`'
+metadata:
+  category: slop
+  source_python_rule: verbose-string-literal-plus-str
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-quote-strip
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-quote-strip] `if s.startswith(q) and s.endswith(q): s[1:-1]` - use `ast.literal_eval(s)` or `s.strip(q)`'
+metadata:
+  category: slop
+  source_python_rule: manual-quote-strip
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-bool-str-parse
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-bool-str-parse] `if s == ''true'': ... elif s == ''false'': ...` - use `{''true'': True, ''false'': False}[s]` or `json.loads(s)`'
+metadata:
+  category: slop
+  source_python_rule: manual-bool-str-parse
+rule:
+  kind: if_statement
+  regex: '==\s*"(true|false)"[\s\S]*else'
+
+---
+id: zig-manual-float-dot-check
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-float-dot-check] `if ''.'' in s: float(s)` - brittle; use `ast.literal_eval` or `try: float(s) except ValueError:`'
+metadata:
+  category: slop
+  source_python_rule: manual-float-dot-check
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-manual-line-continuation-join
+language: zig
+severity: info
+message: '[mechanical Zig port of manual-line-continuation-join] `line += '' '' + part` in loop - collect parts into a list then `'' ''.join(parts)`'
+metadata:
+  category: slop
+  source_python_rule: manual-line-continuation-join
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-returncode-int-cast
+language: zig
+severity: warning
+message: '[mechanical Zig port of returncode-int-cast] int(proc.returncode) - returncode is already int'
+metadata:
+  category: slop
+  source_python_rule: returncode-int-cast
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
+
+---
+id: zig-suffix-slice-removesuffix
+language: zig
+severity: warning
+message: '[mechanical Zig port of suffix-slice-removesuffix] `s[:-len(''literal'')]` - use `s.removesuffix(''literal'')`'
+metadata:
+  category: slop
+  source_python_rule: suffix-slice-removesuffix
+  no_direct_zig_equivalent: true
+  port_note: 'No direct Zig analogue; intentionally inert placeholder to preserve one-to-one source rule mapping.'
+rule:
+  kind: source_file
+  regex: 'a^'
