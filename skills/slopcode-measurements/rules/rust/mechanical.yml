@@ -1,0 +1,133 @@
+---
+id: rust-bool-comparison
+language: rust
+severity: warning
+message: '[mapped rust slop rule] Boolean comparison to literal; use the boolean expression directly.'
+metadata:
+  category: slop
+  mapping_family: bool-comparison
+rule:
+  kind: binary_expression
+  regex: '(==|!=)\s*(true|false)\b|\b(true|false)\s*(==|!=)'
+
+---
+id: rust-len-as-condition
+language: rust
+severity: warning
+message: '[mapped rust slop rule] len() compared to zero; prefer is_empty() where idiomatic.'
+metadata:
+  category: slop
+  mapping_family: len-as-condition
+rule:
+  kind: binary_expression
+  regex: '\.len\s*\(\)\s*(==|!=|>|>=|<|<=)\s*(0|1)\b'
+
+---
+id: rust-option-guard-ladder
+language: rust
+severity: info
+message: '[mapped rust slop rule] Repeated Option checks with early exits; consider combinators or boundary normalization.'
+metadata:
+  category: slop
+  mapping_family: option-guard-ladder
+rule:
+  kind: if_expression
+  regex: '\.(is_none|is_some)\s*\(\)'
+
+---
+id: rust-boolean-return-if-else
+language: rust
+severity: info
+message: '[mapped rust slop rule] if/else returning boolean literals; return the condition or negation.'
+metadata:
+  category: slop
+  mapping_family: boolean-return-if-else
+rule:
+  kind: if_expression
+  regex: 'true[\s\S]*else[\s\S]*false|false[\s\S]*else[\s\S]*true'
+
+---
+id: rust-index-loop
+language: rust
+severity: warning
+message: '[mapped rust slop rule] Index loop over len(); prefer iter/enumerate when possible.'
+metadata:
+  category: slop
+  mapping_family: index-loop
+rule:
+  kind: for_expression
+  regex: 'for\s+[^\n]+in\s+0\s*\.\.[^\n]+\.len\s*\('
+
+---
+id: rust-push-in-loop
+language: rust
+severity: info
+message: '[mapped rust slop rule] Push loop; consider iterator map/filter/collect or extend.'
+metadata:
+  category: slop
+  mapping_family: push-in-loop
+rule:
+  kind: for_expression
+  has:
+    stopBy: end
+    kind: call_expression
+    regex: '\.(push|insert|extend)\('
+
+---
+id: rust-nested-if-no-else
+language: rust
+severity: info
+message: '[mapped rust slop rule] Nested if without else; consider combining conditions or extracting a guard.'
+metadata:
+  category: slop
+  mapping_family: nested-if-no-else
+rule:
+  kind: if_expression
+  has:
+    stopBy: end
+    kind: if_expression
+
+---
+id: rust-repeated-if-guard
+language: rust
+severity: info
+message: '[mapped rust slop rule] Consecutive guard if-expressions with returns.'
+metadata:
+  category: slop
+  mapping_family: repeated-if-guard
+rule:
+  kind: if_expression
+  all:
+    - follows:
+        stopBy: neighbor
+        kind: if_expression
+    - has:
+        stopBy: end
+        kind: return_expression
+
+---
+id: rust-unwrap-expect
+language: rust
+severity: warning
+message: '[mapped rust slop rule] unwrap/expect in non-test code may be defensive shortcut or panic path.'
+metadata:
+  category: slop
+  mapping_family: unwrap-expect
+rule:
+  kind: call_expression
+  regex: '\.(unwrap|expect)\s*\('
+
+---
+id: rust-string-push-loop
+language: rust
+severity: warning
+message: '[mapped rust slop rule] String push/format in loop; consider write! or preallocation.'
+metadata:
+  category: slop
+  mapping_family: string-push-loop
+rule:
+  kind: for_expression
+  has:
+    stopBy: end
+    kind: call_expression
+    regex: '\.(push_str|push)\('

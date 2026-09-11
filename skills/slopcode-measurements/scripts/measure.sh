@@ -13,7 +13,8 @@ Modes:
   both    Run raw and mapped and emit one JSON object.
 
 Supported bundled mapped rules:
-  zig     Uses Tree-sitter custom-language ast-grep config and mechanical Zig ports.
+  python, javascript, typescript, tsx, rust, go, java, c, cpp, csharp,
+  swift, kotlin, ruby, php, zig. Zig uses Tree-sitter custom-language setup.
 
 Dependencies:
   scb-check via uvx, ast-grep, tree-sitter, gcc, git, jq, python3.12+.
@@ -100,6 +101,15 @@ if [ -z "$path" ]; then
   exit 2
 fi
 case "$mode" in raw|mapped|both) ;; *) echo "invalid --mode: $mode" >&2; exit 2 ;; esac
+
+case "$language" in
+  py) language="python" ;;
+  js) language="javascript" ;;
+  ts) language="typescript" ;;
+  rs) language="rust" ;;
+  c++) language="cpp" ;;
+  cs) language="csharp" ;;
+esac
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 skill_dir="$(cd -- "$script_dir/.." && pwd)"

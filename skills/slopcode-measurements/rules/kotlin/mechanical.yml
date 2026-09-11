@@ -1,0 +1,95 @@
+---
+id: kotlin-bool-comparison
+language: kotlin
+severity: warning
+message: '[mapped kotlin slop rule] Boolean comparison to literal; use the boolean expression directly.'
+metadata:
+  category: slop
+  mapping_family: bool-comparison
+rule:
+  kind: source_file
+  regex: '(==|!=)\s*(true|false)\b|\b(true|false)\s*(==|!=)'
+
+---
+id: kotlin-null-guard-ladder
+language: kotlin
+severity: info
+message: '[mapped kotlin slop rule] Repeated null checks with early exits; normalize optionality at boundaries.'
+metadata:
+  category: slop
+  mapping_family: null-guard-ladder
+rule:
+  kind: source_file
+  regex: 'if\s*\([^)]*(==|!=)\s*null[^)]*\)'
+
+---
+id: kotlin-size-as-condition
+language: kotlin
+severity: warning
+message: '[mapped kotlin slop rule] size compared to zero; prefer isEmpty/isNotEmpty.'
+metadata:
+  category: slop
+  mapping_family: size-as-condition
+rule:
+  kind: source_file
+  regex: '\.(size|length)\s*(==|!=|>|>=|<|<=)\s*(0|1)\b'
+
+---
+id: kotlin-boolean-return-if-else
+language: kotlin
+severity: info
+message: '[mapped kotlin slop rule] if/else returning boolean literals; return the condition or negation.'
+metadata:
+  category: slop
+  mapping_family: boolean-return-if-else
+rule:
+  kind: source_file
+  regex: 'if\s*\([^)]*\)[\s\S]*return\s+(true|false)[\s\S]*else[\s\S]*return\s+(false|true)'
+
+---
+id: kotlin-append-in-loop
+language: kotlin
+severity: info
+message: '[mapped kotlin slop rule] Add loop; consider map/filter or addAll where idiomatic.'
+metadata:
+  category: slop
+  mapping_family: append-in-loop
+rule:
+  kind: source_file
+  regex: 'for\s*\([^)]*\)[\s\S]*\.(add|addAll)\s*\('
+
+---
+id: kotlin-not-null-assertion
+language: kotlin
+severity: warning
+message: '[mapped kotlin slop rule] `!!` is often a defensive shortcut; prove invariant or handle nullability explicitly.'
+metadata:
+  category: slop
+  mapping_family: not-null-assertion
+rule:
+  kind: source_file
+  regex: '!!'
+
+---
+id: kotlin-string-concat-loop
+language: kotlin
+severity: warning
+message: '[mapped kotlin slop rule] String concatenation in a loop; use buildString/joinToString where appropriate.'
+metadata:
+  category: slop
+  mapping_family: string-concat-loop
+rule:
+  kind: source_file
+  regex: 'for\s*\([^)]*\)[\s\S]*(\+=|=\s*[^\n]+\+)'
+
+---
+id: kotlin-section-banner-comment
+language: kotlin
+severity: info
+message: '[mapped kotlin slop rule] Decorative section banner comment; prefer structure/names over banners.'
+metadata:
+  category: slop
+  mapping_family: section-banner-comment
+rule:
+  kind: line_comment
+  regex: '^//\s*[-=─]{10,}\s*$'

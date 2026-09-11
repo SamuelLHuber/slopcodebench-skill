@@ -19,11 +19,22 @@ EXTENSIONS: dict[str, tuple[str, ...]] = {
     "js": (".js", ".mjs", ".cjs"),
     "typescript": (".ts", ".tsx"),
     "ts": (".ts", ".tsx"),
+    "tsx": (".tsx",),
     "cpp": (".cpp", ".cc", ".cxx", ".c++", ".hpp", ".hh", ".hxx", ".h"),
     "c++": (".cpp", ".cc", ".cxx", ".c++", ".hpp", ".hh", ".hxx", ".h"),
     "haskell": (".hs",),
     "hs": (".hs",),
+    "go": (".go",),
+    "java": (".java",),
+    "c": (".c", ".h"),
+    "csharp": (".cs",),
+    "cs": (".cs",),
+    "swift": (".swift",),
+    "kotlin": (".kt", ".kts"),
+    "ruby": (".rb",),
+    "php": (".php",),
 }
+
 
 LINE_COMMENT: dict[str, tuple[str, ...]] = {
     "python": ("#",),
@@ -35,11 +46,22 @@ LINE_COMMENT: dict[str, tuple[str, ...]] = {
     "js": ("//",),
     "typescript": ("//",),
     "ts": ("//",),
+    "tsx": ("//",),
     "cpp": ("//",),
     "c++": ("//",),
     "haskell": ("--",),
     "hs": ("--",),
+    "go": ("//",),
+    "java": ("//",),
+    "c": ("//",),
+    "csharp": ("//",),
+    "cs": ("//",),
+    "swift": ("//",),
+    "kotlin": ("//",),
+    "ruby": ("#",),
+    "php": ("//", "#"),
 }
+
 
 
 def load_hits(path: Path) -> list[dict[str, Any]]:

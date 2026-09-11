@@ -1,0 +1,95 @@
+---
+id: ruby-bool-comparison
+language: ruby
+severity: warning
+message: '[mapped ruby slop rule] Boolean comparison to literal; use the boolean expression directly.'
+metadata:
+  category: slop
+  mapping_family: bool-comparison
+rule:
+  kind: program
+  regex: '(==|!=)\s*(true|false)\b|\b(true|false)\s*(==|!=)'
+
+---
+id: ruby-nil-guard-ladder
+language: ruby
+severity: info
+message: '[mapped ruby slop rule] Repeated nil? checks with early exits; normalize optionality at boundaries.'
+metadata:
+  category: slop
+  mapping_family: nil-guard-ladder
+rule:
+  kind: program
+  regex: '\.(nil\?)|==\s*nil|!=\s*nil'
+
+---
+id: ruby-length-as-condition
+language: ruby
+severity: warning
+message: '[mapped ruby slop rule] length/size compared to zero; prefer empty?.'
+metadata:
+  category: slop
+  mapping_family: length-as-condition
+rule:
+  kind: program
+  regex: '\.(length|size)\s*(==|!=|>|>=|<|<=)\s*(0|1)\b'
+
+---
+id: ruby-boolean-return-if-else
+language: ruby
+severity: info
+message: '[mapped ruby slop rule] if/else returning boolean literals; return the condition or negation.'
+metadata:
+  category: slop
+  mapping_family: boolean-return-if-else
+rule:
+  kind: program
+  regex: 'if\s+[\s\S]*true[\s\S]*else[\s\S]*false|if\s+[\s\S]*false[\s\S]*else[\s\S]*true'
+
+---
+id: ruby-push-in-loop
+language: ruby
+severity: info
+message: '[mapped ruby slop rule] Push loop; consider map/filter or concat where idiomatic.'
+metadata:
+  category: slop
+  mapping_family: push-in-loop
+rule:
+  kind: program
+  regex: '\b(each|for)\b[\s\S]*(<<|\.push|\.append)\b'
+
+---
+id: ruby-string-concat-loop
+language: ruby
+severity: warning
+message: '[mapped ruby slop rule] String concatenation in a loop; collect parts and join where appropriate.'
+metadata:
+  category: slop
+  mapping_family: string-concat-loop
+rule:
+  kind: program
+  regex: '\b(each|for)\b[\s\S]*(\+=|<<)'
+
+---
+id: ruby-rescue-sentinel
+language: ruby
+severity: warning
+message: '[mapped ruby slop rule] Broad rescue returning sentinel can hide failures.'
+metadata:
+  category: slop
+  mapping_family: rescue-sentinel
+rule:
+  kind: program
+  regex: 'rescue[\s\S]*(nil|false|true|\[\]|\{\})'
+
+---
+id: ruby-section-banner-comment
+language: ruby
+severity: info
+message: '[mapped ruby slop rule] Decorative section banner comment; prefer structure/names over banners.'
+metadata:
+  category: slop
+  mapping_family: section-banner-comment
+rule:
+  kind: comment
+  regex: '^#\s*[-=─]{10,}\s*$'

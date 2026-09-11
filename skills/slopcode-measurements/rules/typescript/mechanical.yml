@@ -1,0 +1,236 @@
+---
+id: typescript-bool-comparison
+language: typescript
+severity: warning
+message: '[mapped typescript slop rule] Boolean comparison to literal; use the boolean expression directly.'
+metadata:
+  category: slop
+  mapping_family: bool-comparison
+rule:
+  kind: binary_expression
+  regex: '(==|!=|===|!==)\s*(true|false)\b|\b(true|false)\s*(==|!=|===|!==)'
+
+---
+id: typescript-len-as-condition
+language: typescript
+severity: warning
+message: '[mapped typescript slop rule] Length/size compared to zero; prefer emptiness APIs or direct boundary predicates where idiomatic.'
+metadata:
+  category: slop
+  mapping_family: len-as-condition
+rule:
+  kind: binary_expression
+  regex: '(\.(len|length|Length|Count)\b|\.(size|count)\s*\(\)|\blen\s*\()[^\n;]*(==|!=|>|>=|<|<=)\s*(0|1)\b'
+
+---
+id: typescript-nullable-guard-ladder
+language: typescript
+severity: info
+message: '[mapped typescript slop rule] Repeated null/nil checks with early exits; normalize optionality at the boundary when possible.'
+metadata:
+  category: slop
+  mapping_family: nullable-guard-ladder
+rule:
+  kind: if_statement
+  all:
+    - regex: '(==|!=)\s*(null|nil|nullptr)\b|\b(null|nil|nullptr)\s*(==|!=)'
+    - has:
+        stopBy: end
+        any:
+          - kind: return_statement
+          - kind: comment
+
+---
+id: typescript-boolean-return-if-else
+language: typescript
+severity: info
+message: '[mapped typescript slop rule] if/else returning boolean literals; return the condition or its negation.'
+metadata:
+  category: slop
+  mapping_family: boolean-return-if-else
+rule:
+  kind: if_statement
+  regex: 'return\s+(true|false)\s*;[\s\S]*else[\s\S]*return\s+(false|true)\s*;'
+
+---
+id: typescript-nested-if-no-else
+language: typescript
+severity: info
+message: '[mapped typescript slop rule] Nested if without else; consider combining conditions or extracting a guard.'
+metadata:
+  category: slop
+  mapping_family: nested-if-no-else
+rule:
+  kind: if_statement
+  all:
+    - has:
+        stopBy: end
+        kind: if_statement
+    - not:
+        has:
+          stopBy: neighbor
+          kind: else_clause
+
+---
+id: typescript-repeated-if-guard
+language: typescript
+severity: info
+message: '[mapped typescript slop rule] Consecutive guard if-statements with early exits; consider combining or extracting validation.'
+metadata:
+  category: slop
+  mapping_family: repeated-if-guard
+rule:
+  kind: if_statement
+  all:
+    - follows:
+        stopBy: neighbor
+        kind: if_statement
+    - has:
+        stopBy: end
+        any:
+          - kind: return_statement
+          - kind: comment
+
+---
+id: typescript-repeated-validation-calls
+language: typescript
+severity: info
+message: '[mapped typescript slop rule] Repeated validate/check calls; consider a validator table/loop.'
+metadata:
+  category: slop
+  mapping_family: repeated-validation-calls
+rule:
+  kind: expression_statement
+  has:
+    kind: call_expression
+    regex: '\b(validate|verify|check)[A-Za-z0-9_]*\('
+  follows:
+    stopBy: neighbor
+    kind: expression_statement
+    has:
+      kind: call_expression
+      regex: '\b(validate|verify|check)[A-Za-z0-9_]*\('
+
+---
+id: typescript-append-in-loop
+language: typescript
+severity: info
+message: '[mapped typescript slop rule] Single-purpose append/push loop; consider map/filter/extend/collect where idiomatic.'
+metadata:
+  category: slop
+  mapping_family: append-in-loop
+rule:
+  kind: for_statement
+  has:
+    stopBy: end
+    kind: call_expression
+    regex: '\.(append|push|push_back|add|Add|AddRange|emplace_back|insert)\('
+
+---
+id: typescript-consecutive-append-calls
+language: typescript
+severity: info
+message: '[mapped typescript slop rule] Consecutive append/push calls; consider batch append/extend or literal initialization.'
+metadata:
+  category: slop
+  mapping_family: consecutive-append-calls
+rule:
+  kind: expression_statement
+  has:
+    kind: call_expression
+    regex: '\.(append|push|push_back|add|Add|emplace_back|insert)\('
+  follows:
+    stopBy: neighbor
+    kind: expression_statement
+    has:
+      kind: call_expression
+      regex: '\.(append|push|push_back|add|Add|emplace_back|insert)\('
+
+---
+id: typescript-manual-string-concat-loop
+language: typescript
+severity: warning
+message: '[mapped typescript slop rule] String concatenation in a loop; collect parts/use builder/join where idiomatic.'
+metadata:
+  category: slop
+  mapping_family: manual-string-concat-loop
+rule:
+  kind: assignment_expression
+  regex: '(\+=|=\s*[^;\n]+\+)'
+  inside:
+    stopBy: end
+    any:
+      - kind: for_statement
+      - kind: while_statement
+
+---
+id: typescript-identity-wrapper-function
+language: typescript
+severity: info
+message: '[mapped typescript slop rule] Function appears to just return another call; wrapper may add little value.'
+metadata:
+  category: slop
+  mapping_family: identity-wrapper-function
+rule:
+  kind: program
+  regex: 'return\s+[A-Za-z_][A-Za-z0-9_.]*\([^;{}]*\)\s*;'
+
+---
+id: typescript-manual-string-dispatch
+language: typescript
+severity: info
+message: '[mapped typescript slop rule] if/else string equality dispatch; consider map/table dispatch or enum parsing.'
+metadata:
+  category: slop
+  mapping_family: manual-string-dispatch
+rule:
+  kind: if_statement
+  regex: '==\s*"[^"]+"[\s\S]*else'
+
+---
+id: typescript-section-banner-comment
+language: typescript
+severity: info
+message: '[mapped typescript slop rule] Decorative section banner comment; prefer structure/names over banners.'
+metadata:
+  category: slop
+  mapping_family: section-banner-comment
+rule:
+  kind: comment
+  regex: '^//\s*[-=─]{10,}\s*$'
+
+---
+id: typescript-json-deep-copy
+language: typescript
+severity: warning
+message: '[mapped typescript slop rule] JSON parse/stringify clone; use structuredClone or domain copy.'
+metadata:
+  category: slop
+  mapping_family: json-deep-copy
+rule:
+  kind: call_expression
+  regex: 'JSON\.parse\s*\(\s*JSON\.stringify\s*\('
+
+---
+id: typescript-array-index-loop
+language: typescript
+severity: warning
+message: '[mapped typescript slop rule] Index loop over array length; prefer for-of/entries unless index is essential.'
+metadata:
+  category: slop
+  mapping_family: array-index-loop
+rule:
+  kind: for_statement
+  regex: 'for\s*\([^;]+=[^;]*0[^;]*;[^;]*<[^;]*\.length[^;]*;'
+
+---
+id: typescript-redundant-array-wrap
+language: typescript
+severity: warning
+message: '[mapped typescript slop rule] Redundant Array/list materialization around iterable operations.'
+metadata:
+  category: slop
+  mapping_family: redundant-array-wrap
+rule:
+  kind: call_expression
+  regex: '(Array\.from\s*\(\s*\[|new\s+Array\s*\()'

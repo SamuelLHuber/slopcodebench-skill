@@ -1,0 +1,210 @@
+---
+id: cpp-bool-comparison
+language: cpp
+severity: warning
+message: '[mapped cpp slop rule] Boolean comparison to literal; use the boolean expression directly.'
+metadata:
+  category: slop
+  mapping_family: bool-comparison
+rule:
+  kind: binary_expression
+  regex: '(==|!=|===|!==)\s*(true|false)\b|\b(true|false)\s*(==|!=|===|!==)'
+
+---
+id: cpp-len-as-condition
+language: cpp
+severity: warning
+message: '[mapped cpp slop rule] Length/size compared to zero; prefer emptiness APIs or direct boundary predicates where idiomatic.'
+metadata:
+  category: slop
+  mapping_family: len-as-condition
+rule:
+  kind: binary_expression
+  regex: '(\.(len|length|Length|Count)\b|\.(size|count)\s*\(\)|\blen\s*\()[^\n;]*(==|!=|>|>=|<|<=)\s*(0|1)\b'
+
+---
+id: cpp-boolean-return-if-else
+language: cpp
+severity: info
+message: '[mapped cpp slop rule] if/else returning boolean literals; return the condition or its negation.'
+metadata:
+  category: slop
+  mapping_family: boolean-return-if-else
+rule:
+  kind: if_statement
+  regex: 'return\s+(true|false)\s*;[\s\S]*else[\s\S]*return\s+(false|true)\s*;'
+
+---
+id: cpp-nested-if-no-else
+language: cpp
+severity: info
+message: '[mapped cpp slop rule] Nested if without else; consider combining conditions or extracting a guard.'
+metadata:
+  category: slop
+  mapping_family: nested-if-no-else
+rule:
+  kind: if_statement
+  all:
+    - has:
+        stopBy: end
+        kind: if_statement
+    - not:
+        has:
+          stopBy: neighbor
+          kind: else_clause
+
+---
+id: cpp-repeated-if-guard
+language: cpp
+severity: info
+message: '[mapped cpp slop rule] Consecutive guard if-statements with early exits; consider combining or extracting validation.'
+metadata:
+  category: slop
+  mapping_family: repeated-if-guard
+rule:
+  kind: if_statement
+  all:
+    - follows:
+        stopBy: neighbor
+        kind: if_statement
+    - has:
+        stopBy: end
+        any:
+          - kind: return_statement
+          - kind: comment
+
+---
+id: cpp-repeated-validation-calls
+language: cpp
+severity: info
+message: '[mapped cpp slop rule] Repeated validate/check calls; consider a validator table/loop.'
+metadata:
+  category: slop
+  mapping_family: repeated-validation-calls
+rule:
+  kind: expression_statement
+  has:
+    kind: call_expression
+    regex: '\b(validate|verify|check)[A-Za-z0-9_]*\('
+  follows:
+    stopBy: neighbor
+    kind: expression_statement
+    has:
+      kind: call_expression
+      regex: '\b(validate|verify|check)[A-Za-z0-9_]*\('
+
+---
+id: cpp-append-in-loop
+language: cpp
+severity: info
+message: '[mapped cpp slop rule] Single-purpose append/push loop; consider map/filter/extend/collect where idiomatic.'
+metadata:
+  category: slop
+  mapping_family: append-in-loop
+rule:
+  kind: for_statement
+  has:
+    stopBy: end
+    kind: call_expression
+    regex: '\.(append|push|push_back|add|Add|AddRange|emplace_back|insert)\('
+
+---
+id: cpp-consecutive-append-calls
+language: cpp
+severity: info
+message: '[mapped cpp slop rule] Consecutive append/push calls; consider batch append/extend or literal initialization.'
+metadata:
+  category: slop
+  mapping_family: consecutive-append-calls
+rule:
+  kind: expression_statement
+  has:
+    kind: call_expression
+    regex: '\.(append|push|push_back|add|Add|emplace_back|insert)\('
+  follows:
+    stopBy: neighbor
+    kind: expression_statement
+    has:
+      kind: call_expression
+      regex: '\.(append|push|push_back|add|Add|emplace_back|insert)\('
+
+---
+id: cpp-manual-string-concat-loop
+language: cpp
+severity: warning
+message: '[mapped cpp slop rule] String concatenation in a loop; collect parts/use builder/join where idiomatic.'
+metadata:
+  category: slop
+  mapping_family: manual-string-concat-loop
+rule:
+  kind: assignment_expression
+  regex: '(\+=|=\s*[^;\n]+\+)'
+  inside:
+    stopBy: end
+    any:
+      - kind: for_statement
+      - kind: while_statement
+
+---
+id: cpp-identity-wrapper-function
+language: cpp
+severity: info
+message: '[mapped cpp slop rule] Function appears to just return another call; wrapper may add little value.'
+metadata:
+  category: slop
+  mapping_family: identity-wrapper-function
+rule:
+  kind: translation_unit
+  regex: 'return\s+[A-Za-z_][A-Za-z0-9_.]*\([^;{}]*\)\s*;'
+
+---
+id: cpp-manual-string-dispatch
+language: cpp
+severity: info
+message: '[mapped cpp slop rule] if/else string equality dispatch; consider map/table dispatch or enum parsing.'
+metadata:
+  category: slop
+  mapping_family: manual-string-dispatch
+rule:
+  kind: if_statement
+  regex: '==\s*"[^"]+"[\s\S]*else'
+
+---
+id: cpp-section-banner-comment
+language: cpp
+severity: info
+message: '[mapped cpp slop rule] Decorative section banner comment; prefer structure/names over banners.'
+metadata:
+  category: slop
+  mapping_family: section-banner-comment
+rule:
+  kind: comment
+  regex: '^//\s*[-=─]{10,}\s*$'
+
+---
+id: cpp-null-guard-ladder
+language: cpp
+severity: info
+message: '[mapped cpp slop rule] Repeated null/nullptr checks with early exits; normalize ownership/validity at boundary.'
+metadata:
+  category: slop
+  mapping_family: null-guard-ladder
+rule:
+  kind: if_statement
+  all:
+    - regex: '(==|!=)\s*(NULL|nullptr|0)\b|\b(NULL|nullptr)\s*(==|!=)'
+    - has:
+        stopBy: end
+        kind: return_statement
+
+---
+id: cpp-index-loop
+language: cpp
+severity: warning
+message: '[mapped cpp slop rule] Index loop over size/length; prefer range-for/span algorithms where idiomatic.'
+metadata:
+  category: slop
+  mapping_family: index-loop
+rule:
+  kind: for_statement
+  regex: 'for\s*\([^;]+=[^;]*0[^;]*;[^;]*<[^;]*(\.size\s*\(\)|strlen\s*\(|sizeof\s*\()'

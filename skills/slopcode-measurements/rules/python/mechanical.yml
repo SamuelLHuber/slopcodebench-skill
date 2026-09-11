@@ -1,0 +1,3607 @@
+---
+id: chained-comparison-opportunity
+language: python
+severity: warning
+message: "`a < b and b < c` - use chained form `a < b < c`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: boolean_operator
+  any:
+  - pattern: $A < $B and $B < $C
+  - pattern: $A > $B and $B > $C
+  - pattern: $A <= $B and $B <= $C
+  - pattern: $A >= $B and $B >= $C
+  - pattern: $A < $B and $B <= $C
+  - pattern: $A <= $B and $B < $C
+  - pattern: $A > $B and $B >= $C
+  - pattern: $A >= $B and $B > $C
+---
+id: bool-comparison
+language: python
+severity: warning
+message: "`x == True` / `x == False` - use `if x:` / `if not x:`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: comparison_operator
+  regex: ==\s*(True|False)
+---
+id: chained-none-check
+language: python
+severity: info
+message: "`x is not None and y is not None` - use `all(v is not None for v in (x, y))` or try/except"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: boolean_operator
+  regex: is not None\s+(and|or)\s+\w+\s+is not None
+---
+id: empty-string-or
+language: python
+severity: info
+message: "`x == '' or ...` - use `not x` to catch empty string via truthiness"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: boolean_operator
+  regex: ==\s*(""|'')\s+(or|and)
+---
+id: pointless-bool-cast
+language: python
+severity: warning
+message: "`if bool(x):` - drop `bool()`, `if` already tests truthiness"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  pattern: "if bool($COND):\n  $$$\n"
+---
+id: redundant-bool-in-condition
+language: python
+severity: warning
+message: "`bool(x)` inside `if`/`and`/`or` - drop it, these already test truthiness"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  has:
+    kind: boolean_operator
+    has:
+      kind: call
+      pattern: bool($X)
+---
+id: redundant-bool-ternary
+language: python
+severity: warning
+message: "`True if x else False` - use `bool(x)` (or just `x` if already boolean)"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: conditional_expression
+  regex: True\s+if.*else\s+False|False\s+if.*else\s+True
+---
+id: redundant-none-empty-check
+language: python
+severity: info
+message: "`x is not None and x != ''` - use `if x:` (empty string is also falsy)"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: boolean_operator
+  regex: is not None.*(!=\s*""|len\(|==\s*""|!=\s*''|==\s*'')
+---
+id: len-as-condition
+language: python
+severity: warning
+message: "`len(x) == 0` - use `if not x:` (or `if x:` for `> 0`)"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: comparison_operator
+  all:
+  - has:
+      kind: call
+      has:
+        kind: identifier
+        regex: ^len$
+  - has:
+      kind: integer
+      pattern: '0'
+---
+id: len-comparison
+language: python
+severity: warning
+message: "`len(x) > 0` / `len(x) != 0` - use `if x:`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: comparison_operator
+  has:
+    kind: call
+    regex: ^len\(
+  regex: (>\s*0|!=\s*0|>=\s*1)
+---
+id: type-equality
+language: python
+severity: warning
+message: "`type(x) == T` - use `isinstance(x, T)` (handles subclasses)"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: comparison_operator
+  has:
+    kind: call
+    regex: ^type\(
+---
+id: multiple-isinstance-or
+language: python
+severity: warning
+message: "`isinstance(x, A) or isinstance(x, B)` - use `isinstance(x, (A, B))`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: boolean_operator
+  pattern: isinstance($X, $T1) or isinstance($X, $T2)
+---
+id: isinstance-bool-exclusion
+language: python
+severity: info
+message: "`isinstance(x, bool)` - `bool` is an `int` subclass; reconsider whether you want type-specific handling"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: call
+  regex: isinstance\([^,]+,\s*bool\)
+---
+id: is-true-false-strict
+language: python
+severity: warning
+message: is True / is False identity check - use truthiness
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: comparison_operator
+  any:
+  - pattern: $X is True
+  - pattern: $X is False
+  - pattern: $X is not True
+  - pattern: $X is not False
+---
+id: bool-numeric-triple-guard
+language: python
+severity: info
+message: isinstance bool guard combined with numeric isinstance - wrap in helper rather than inlining
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: boolean_operator
+  regex: "isinstance\\([^,]+,\\s*bool\\).*isinstance"
+---
+id: mutual-isinstance-or-and
+language: python
+severity: info
+message: "`isinstance(a, T) or isinstance(b, T): return isinstance(a, T) and isinstance(b, T) and ...` - lift `type(a) is type(b) is T` or an early-return guard"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  pattern: |
+    if isinstance($L, $T) or isinstance($R, $T):
+        return isinstance($L, $T) and isinstance($R, $T) and $BODY
+---
+id: duplicated-if-condition
+language: python
+severity: warning
+message: "Same condition in `if` and `elif` - elif branch is unreachable, remove it"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  pattern: "if $COND:\n  $$$\nelif $COND:\n  $$$\n"
+---
+id: isinstance-return-ladder
+language: python
+severity: info
+message: "`isinstance` ladder returning literals - use dispatch dict `{Type: value}[type(x)]` or polymorphism"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern: "if isinstance($X, $T1):\n  return $V1\nelif isinstance($X, $T2):\n  return\
+      \ $V2\n"
+  - kind: if_statement
+    all:
+    - pattern: "if isinstance($X, $T1):\n  return $V1\n"
+    - precedes:
+        stopBy: neighbor
+        kind: if_statement
+        pattern: "if isinstance($X, $T2):\n  return $V2\n"
+---
+id: manual-min-max
+language: python
+severity: info
+message: "Manual min/max `if a > b: m = a else: m = b` - use `m = max(a, b)` / `min(a, b)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  any:
+  - pattern: "if $A > $B:\n  $M = $A\nelse:\n  $M = $B\n"
+  - pattern: "if $A < $B:\n  $M = $A\nelse:\n  $M = $B\n"
+  - pattern: "if $A >= $B:\n  $M = $A\nelse:\n  $M = $B\n"
+  - pattern: "if $A <= $B:\n  $M = $A\nelse:\n  $M = $B\n"
+---
+id: nested-if-no-else
+language: python
+severity: info
+message: "Nested `if` is the only statement in outer `if` body and neither has `else` - combine with `and` into a single condition"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - has:
+      stopBy: neighbor
+      kind: block
+      all:
+      # there is a nested if without else/elif as a direct child
+      - has:
+          stopBy: neighbor
+          kind: if_statement
+          not:
+            any:
+            - has:
+                stopBy: neighbor
+                kind: else_clause
+            - has:
+                stopBy: neighbor
+                kind: elif_clause
+      # ...and no other direct child statement (only the nested if)
+      - not:
+          has:
+            stopBy: neighbor
+            not:
+              kind: if_statement
+  - not:
+      any:
+      - has:
+          stopBy: neighbor
+          kind: else_clause
+      - has:
+          stopBy: neighbor
+          kind: elif_clause
+---
+id: nested-guard-invert
+language: python
+severity: info
+message: "Nested `if` early-exit guard with sibling code in outer `if` body - invert outer to early-exit (`if not outer: return/continue`) and flatten the nesting"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  # outer if must not have else/elif
+  - not:
+      any:
+      - has:
+          stopBy: neighbor
+          kind: else_clause
+      - has:
+          stopBy: neighbor
+          kind: elif_clause
+  # outer if body contains nested early-exit if plus sibling code
+  - has:
+      stopBy: neighbor
+      kind: block
+      all:
+      # contains a nested if without else/elif whose body has an early exit
+      - has:
+          stopBy: neighbor
+          kind: if_statement
+          all:
+          - not:
+              any:
+              - has:
+                  stopBy: neighbor
+                  kind: else_clause
+              - has:
+                  stopBy: neighbor
+                  kind: elif_clause
+          - has:
+              stopBy: neighbor
+              kind: block
+              has:
+                stopBy: neighbor
+                any:
+                - kind: return_statement
+                - kind: continue_statement
+                - kind: raise_statement
+                - kind: break_statement
+      # ...AND has at least one direct child that is not the nested if
+      # (this is what distinguishes from nested-if-no-else)
+      - has:
+          stopBy: neighbor
+          not:
+            kind: if_statement
+  # only suggest inversion when this if is tail-position in its parent block
+  - not:
+      precedes:
+        stopBy: neighbor
+        any:
+        - kind: expression_statement
+        - kind: return_statement
+        - kind: if_statement
+        - kind: for_statement
+        - kind: while_statement
+        - kind: try_statement
+        - kind: with_statement
+        - kind: raise_statement
+        - kind: assert_statement
+        - kind: import_statement
+        - kind: import_from_statement
+        - kind: global_statement
+        - kind: nonlocal_statement
+        - kind: delete_statement
+        - kind: pass_statement
+        - kind: break_statement
+        - kind: continue_statement
+        - kind: match_statement
+---
+id: repeated-if-continue
+language: python
+severity: info
+message: "Multiple `if: continue` guards - combine with `or` or filter via comprehension"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: for_statement
+  has:
+    kind: block
+    has:
+      kind: if_statement
+      has:
+        kind: block
+        has:
+          kind: continue_statement
+      follows:
+        kind: if_statement
+        has:
+          kind: block
+          has:
+            kind: continue_statement
+---
+id: repeated-if-return-error
+language: python
+severity: info
+message: "Repeated `if: return error` checks - collect into one validator or raise"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  has:
+    kind: block
+    has:
+      kind: return_statement
+      regex: error|Error|ERROR
+  follows:
+    kind: if_statement
+    has:
+      kind: block
+      has:
+        kind: return_statement
+        regex: error|Error|ERROR
+---
+id: repeated-validation-calls
+language: python
+severity: info
+message: "Repeated `validate_*()` calls - loop over a list of validators"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: expression_statement
+  has:
+    kind: call
+    regex: ^validate_
+  follows:
+    kind: expression_statement
+    has:
+      kind: call
+      regex: ^validate_
+---
+id: ternary-same-value
+language: python
+severity: warning
+message: "`x if c else x` - both branches equal, drop the ternary"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: conditional_expression
+  pattern: $VALUE if $COND else $VALUE
+---
+id: repeated-function-or-chain
+language: python
+severity: info
+message: "`f(a) or f(b) or f(c) or f(d)` - use `any(f(x) for x in (a,b,c,d))`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: boolean_operator
+  pattern: $F($$$A) or $F($$$B) or $F($$$C) or $F($$$D)
+---
+id: value-compare-return-ladder
+language: python
+severity: info
+message: "`if x == v1: return r1 elif x == v2: ...` - use `{v1: r1, v2: r2}.get(x, default)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  pattern: "if $X == $V1:\n  return $R1\nelif $X == $V2:\n  return $R2\nelif $X ==\
+    \ $V3:\n  return $R3\n"
+  not:
+    has:
+      kind: else_clause
+---
+id: repetitive-list-append-elif
+language: python
+severity: info
+message: "`.append()` in each elif branch - compute value once then append, or dispatch"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  pattern: "if $C1:\n  $L.append($A)\nelif $C2:\n  $L.append($B)\nelif $C3:\n  $L.append($C)\n"
+---
+id: boolean-return-if-else
+language: python
+severity: info
+message: "`if c: return True else: return False` - use `return c` (or `return not c`)"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  any:
+  - pattern: "if $COND:\n  return True\nelse:\n  return False\n"
+  - pattern: "if $COND:\n  return False\nelse:\n  return True\n"
+---
+id: consecutive-if-same-variable
+language: python
+severity: info
+message: "Consecutive `if` on same variable - use `elif` (or return early after first branch)"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  has:
+    kind: comparison_operator
+    has:
+      kind: identifier
+      pattern: $VAR
+  follows:
+    kind: if_statement
+    all:
+    - has:
+        kind: comparison_operator
+        has:
+          kind: identifier
+          pattern: $VAR
+    - has:
+        kind: block
+        has:
+          kind: return_statement
+    stopBy: neighbor
+---
+id: nested-attribute-guard-chain
+language: python
+severity: info
+message: "Nested `if x: if x.y: if x.y.z:` - use try/except AttributeError, or extract a small helper"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - has:
+      kind: identifier
+      pattern: $OBJ
+  - has:
+      kind: block
+      has:
+        kind: if_statement
+        all:
+        - has:
+            kind: attribute
+            has:
+              kind: identifier
+              pattern: $OBJ
+        - has:
+            kind: block
+            has:
+              kind: if_statement
+---
+id: repeated-isinstance-validation
+language: python
+severity: info
+message: "Repeated `if not isinstance(x, T): raise` - use type hints or a schema validator"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - has:
+      kind: not_operator
+      has:
+        kind: call
+        pattern: isinstance($VAR, $TYPE)
+  - has:
+      kind: block
+      has:
+        kind: raise_statement
+  follows:
+    kind: if_statement
+    all:
+    - has:
+        kind: not_operator
+        has:
+          kind: call
+          regex: isinstance
+    - has:
+        kind: block
+        has:
+          kind: raise_statement
+    stopBy: neighbor
+---
+id: ternary-none-comparison
+language: python
+severity: info
+message: "`v if x is None else o` - rewrite as `o if x is not None else v` for natural reading"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: conditional_expression
+  pattern: $VAL if $VAR is None else $OTHER
+---
+id: fetchone-none-check
+language: python
+severity: info
+message: "`row = cursor.fetchone(); if row is None:` - extract to `fetch_one_or_none()` helper"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  has:
+    kind: comparison_operator
+    regex: is None
+  follows:
+    kind: expression_statement
+    has:
+      kind: assignment
+      has:
+        kind: call
+        has:
+          kind: attribute
+          regex: \.fetchone$
+    stopBy: neighbor
+---
+id: guard-return-none
+language: python
+severity: info
+message: "`if x is None: return None` followed by another `return` - drop guard, `None` flows naturally"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  pattern: 'if $X is None: return None'
+  precedes:
+    kind: return_statement
+---
+id: if-none-raise
+language: python
+severity: info
+message: "`if x is None: raise` - let natural `AttributeError`/`TypeError` surface, or enforce via type hint"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  pattern: |
+    if $X is None:
+        raise $ERR
+constraints:
+  ERR:
+    not:
+      regex: "^(typer\\.Exit|SystemExit)\\b"
+---
+id: if-return-bool-else
+language: python
+severity: info
+message: "`if c: return True else: return False` - use `return bool(c)` or `return c`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - has:
+      kind: block
+      has:
+        kind: return_statement
+        regex: return True
+  - has:
+      kind: else_clause
+      has:
+        kind: block
+        has:
+          kind: return_statement
+          regex: return False
+---
+id: unnecessary-elif
+language: python
+severity: warning
+message: "`elif` after `return`/`raise` - use plain `if` (previous branch exits, no fallthrough)"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - has:
+      kind: block
+      any:
+      - has:
+          kind: return_statement
+      - has:
+          kind: raise_statement
+  - has:
+      kind: elif_clause
+---
+id: unnecessary-else-raise
+language: python
+severity: warning
+message: "`else` after `raise` - drop `else`, subsequent code runs only when no raise"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - has:
+      kind: block
+      has:
+        kind: raise_statement
+  - has:
+      kind: else_clause
+---
+id: verbose-and-return
+language: python
+severity: info
+message: "`if not x: return False` - combine with later condition or `return x and ...`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - has:
+      kind: not_operator
+  - has:
+      kind: block
+      has:
+        kind: return_statement
+        regex: return False
+  not:
+    has:
+      kind: else_clause
+---
+id: verbose-none-default
+language: python
+severity: info
+message: "`if x is None: x = default` - use `x = x if x is not None else default`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  pattern: "if $VAR is None:\n    $VAR = $DEFAULT\n"
+---
+id: verbose-or-return
+language: python
+severity: info
+message: "`if x: return True` - combine with later condition or `return x or ...`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  has:
+    kind: block
+    has:
+      kind: return_statement
+      regex: return True
+  not:
+    has:
+      kind: else_clause
+---
+id: defensive-isinstance-return
+language: python
+severity: info
+message: "`if not isinstance(x, T): return err` - use type hints or a schema validator"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  pattern: "if not isinstance($VAR, $TYPE):\n    return $ERR\n"
+---
+id: defensive-if-return-same
+language: python
+severity: info
+message: "`if x: return x` - use `return x or None` (or just `return x`)"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  pattern: "if $X:\n    return $X\n"
+---
+id: return-ternary-or-none
+language: python
+severity: warning
+message: "`return x if x else None` - use `return x or None`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: return_statement
+  has:
+    kind: conditional_expression
+    pattern: $X if $X else None
+---
+id: if-pass-else-action
+language: python
+severity: info
+message: "`if c: pass else: ...` - invert to `if not c: ...`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - has:
+      kind: block
+      has:
+        kind: pass_statement
+      not:
+        has:
+          kind: expression_statement
+  - has:
+      kind: else_clause
+---
+id: defensive-or-empty
+language: python
+severity: warning
+message: "`x if x else []` - use `x or []`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: conditional_expression
+  any:
+  - pattern: $X if $X else []
+  - pattern: $X if $X else {}
+---
+id: redundant-guard-same-return
+language: python
+severity: warning
+message: "`if c: return r; return r` - drop the guard, both paths return the same value"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  pattern: |
+    if $COND:
+        return $RET
+  precedes:
+    kind: return_statement
+    pattern: return $RET
+    stopBy: neighbor
+---
+id: duplicate-wrapper-return-branches
+language: python
+severity: warning
+message: "`if c: return f(a) else: return f(b)` - use `return f(a if c else b)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  pattern: |
+    if $COND:
+        return $F($A)
+    else:
+        return $F($B)
+---
+id: conditional-same-target-append
+language: python
+severity: warning
+message: "`if c: lst.append(a) else: lst.append(b)` - use `lst.append(a if c else b)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  pattern: |
+    if $COND:
+        $OUT.append($A)
+    else:
+        $OUT.append($B)
+---
+id: conditional-same-target-extend
+language: python
+severity: warning
+message: "`if c: lst.extend(a) else: lst.extend(b)` - use `lst.extend(a if c else b)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  pattern: |
+    if $COND:
+        $OUT.extend($A)
+    else:
+        $OUT.extend($B)
+---
+id: conditional-same-target-subscript-assign
+language: python
+severity: warning
+message: "`if c: d[k] = a else: d[k] = b` - use `d[k] = a if c else b`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  pattern: |
+    if $COND:
+        $OBJ[$KEY] = $A
+    else:
+        $OBJ[$KEY] = $B
+---
+id: duplicate-wrapper-assign-branches
+language: python
+severity: warning
+message: "`if c: x = f(a) else: x = f(b)` - use `x = f(a if c else b)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  pattern: |
+    if $COND:
+        $VAR = $F($A)
+    else:
+        $VAR = $F($B)
+---
+id: duplicate-tuple-return-branches
+language: python
+severity: warning
+message: "`if c: return (a, b) else: return (x, b)` - use `return (a if c else x, b)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  any:
+  - pattern: |
+      if $COND:
+          return ($A, $B)
+      else:
+          return ($C, $B)
+  - pattern: |
+      if $COND:
+          return ($A, $B)
+      else:
+          return ($A, $C)
+---
+id: tail-predicate-chain
+language: python
+severity: info
+message: "Consecutive `if not x: return False` before a final return - collapse to `return x and y and ...`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - pattern: "if not $X:\n  return False\n"
+  - follows:
+      stopBy: neighbor
+      pattern: "if not $Y:\n  return False\n"
+  - precedes:
+      stopBy: neighbor
+      kind: return_statement
+---
+id: duplicate-regex-return
+language: python
+severity: warning
+message: "Multiple `re.search` returning same value - combine patterns with `|` or loop over a list"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  pattern: "if re.search($PAT_A, $TEXT):\n  return $CODE\n"
+  follows:
+    pattern: "if re.search($PAT_B, $TEXT):\n  return $CODE\n"
+---
+id: lbyl-isfile-before-open
+language: python
+severity: warning
+message: os.path.isfile guard before open is redundant and race-prone; use try/except OSError
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - has:
+      kind: call
+      regex: "os\\.path\\.(isfile|exists)\\("
+  - has:
+      kind: block
+      has:
+        kind: with_statement
+        regex: "open\\("
+---
+id: stdout-or-if-stdout
+language: python
+severity: warning
+message: "(x or '') if x else '' - the 'or' branch already handles None"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: "($X or $EMPTY) if $X else $EMPTY"
+---
+id: double-guard-same-value
+language: python
+severity: info
+message: "`if not isinstance(x, T): raise` + `if not x: raise` - collapse to one guard (`or` the conditions or narrow via schema)"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - pattern: "if not isinstance($X, $T):\n    raise $ERR1\n"
+  - precedes:
+      stopBy: neighbor
+      kind: if_statement
+      pattern: "if not $X:\n    raise $ERR2\n"
+---
+id: tuple-value-err-caller-unpack
+language: python
+severity: info
+message: "`v, err = f(...); if err: return err` - raise typed exceptions instead of Go-style `(value, err)` tuples"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: expression_statement
+  has:
+    kind: assignment
+    all:
+    - has:
+        kind: pattern_list
+        field: left
+    - has:
+        kind: call
+        field: right
+  precedes:
+    stopBy: neighbor
+    kind: if_statement
+    pattern: |
+      if $E:
+          return $E
+---
+id: optional-param-self-getter-fallback
+language: python
+severity: info
+message: "`x = x if x is not None else self.getter()` as a default - drop the optional param and read from `self` directly"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  pattern: "$VAR = $VAR if $VAR is not None else self.$GETTER()"
+---
+id: isinstance-then-bound-check
+language: python
+severity: info
+message: "`if not isinstance(x, int): raise` + `if x < N: raise` - one validator (`ensure_positive_int`) or `Annotated[int, Ge(N)]`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - has:
+      kind: not_operator
+      has:
+        kind: call
+        regex: "^isinstance\\("
+  - has:
+      kind: block
+      has:
+        kind: raise_statement
+  precedes:
+    stopBy: neighbor
+    kind: if_statement
+    all:
+    - has:
+        kind: comparison_operator
+        any:
+        - regex: "^[A-Za-z_][A-Za-z0-9_]*\\s*<\\s*"
+        - regex: "^[A-Za-z_][A-Za-z0-9_]*\\s*<=\\s*"
+        - regex: "^[A-Za-z_][A-Za-z0-9_]*\\s*>\\s*"
+        - regex: "^[A-Za-z_][A-Za-z0-9_]*\\s*>=\\s*"
+    - has:
+        kind: block
+        has:
+          kind: raise_statement
+---
+id: defensive-fstring-raise-heavy
+language: python
+severity: info
+message: "Function body has 3+ `raise ...(f'...{var}...')` statements; dense per-field validation belongs at the boundary, not in a helper."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  regex: 'raise\s+\w+[^)]*f"[^"]*\{[^}]*\}[\s\S]*raise\s+\w+[^)]*f"[^"]*\{[^}]*\}[\s\S]*raise\s+\w+[^)]*f"[^"]*\{[^}]*\}'
+---
+id: defensive-isinstance-raise-heavy
+language: python
+severity: info
+message: "Function body runs 3+ `if not isinstance(...): raise` checks; these are boundary validations leaking into core logic."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  regex: 'if\s+not\s+isinstance\([^)]+\):[\s\S]*?raise[\s\S]*if\s+not\s+isinstance\([^)]+\):[\s\S]*?raise[\s\S]*if\s+not\s+isinstance\([^)]+\):[\s\S]*?raise'
+---
+id: defensive-none-return-heavy
+language: python
+severity: info
+message: "Function body has 3+ `if … is None: return None` / `if not …: return None` guards; plumbing `None` through helpers is defensive slop."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  regex: '(if\s+\w[\w.]*\s+is\s+None:\s*\n\s+return\s+None[\s\S]*){3,}'
+---
+id: defensive-try-soup-function
+language: python
+severity: info
+message: "Function body has 3+ `try/except` blocks — that is error-handling-as-control-flow. Rethink the contract or split the function."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  regex: '(try:[\s\S]*?except[\s\S]*?){3,}'
+---
+id: defensive-except-exception-heavy
+language: python
+severity: info
+message: "Function body has 2+ `except Exception:` / bare `except:` clauses; catching-everything multiple times in one function is a paranoia smell."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  regex: '(except\s+Exception[\s:][\s\S]*){2,}'
+---
+id: defensive-validator-function
+language: python
+severity: info
+message: "Function body runs `if not isinstance(...): raise …` plus returns; this is a boundary validator living inside core logic. Validate once at the entrypoint, not per helper."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  all:
+    - has:
+        field: body
+        kind: block
+        has:
+          stopBy: end
+          kind: if_statement
+          any:
+            - pattern: |
+                if not isinstance($V, $T):
+                    raise $$$A
+            - pattern: |
+                if not isinstance($V, ($$$T)):
+                    raise $$$A
+    - has:
+        field: body
+        kind: block
+        has:
+          stopBy: end
+          kind: raise_statement
+          has:
+            stopBy: end
+            kind: string
+            regex: '\{[^}]*\}'
+---
+id: defensive-validator-returnmix
+language: python
+severity: info
+message: "Function combines `isinstance` guards with `is None` guards and returns; stop per-field validation — assert the contract at the boundary."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  all:
+    - has:
+        field: body
+        kind: block
+        has:
+          stopBy: end
+          kind: if_statement
+          any:
+            - pattern: |
+                if not isinstance($V, $T):
+                    return $$$A
+            - pattern: |
+                if not isinstance($V, ($$$T)):
+                    return $$$A
+    - has:
+        field: body
+        kind: block
+        has:
+          stopBy: end
+          kind: if_statement
+          any:
+            - pattern: |
+                if $V2 is None:
+                    return $$$A
+            - pattern: |
+                if not $V2:
+                    return $$$A
+---
+id: defensive-function-isinstance-heavy
+language: python
+severity: info
+message: "Function has 2+ `isinstance` checks in its body; inline type-policing is defensive slop. Validate at the boundary, then trust the type."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  all:
+    - has:
+        field: body
+        kind: block
+        has:
+          stopBy: end
+          kind: call
+          regex: '^isinstance\('
+    - has:
+        field: body
+        kind: block
+        has:
+          stopBy: end
+          kind: if_statement
+          pattern: |
+            if not isinstance($V, $T):
+                $$$A
+    - has:
+        field: body
+        kind: block
+        has:
+          stopBy: end
+          kind: if_statement
+          any:
+            - pattern: |
+                if isinstance($V, $T):
+                    $$$A
+            - pattern: |
+                if not isinstance($V, $T):
+                    $$$A
+          precedes:
+            stopBy: end
+            kind: if_statement
+            any:
+              - pattern: |
+                  if isinstance($V2, $T2):
+                      $$$B
+              - pattern: |
+                  if not isinstance($V2, $T2):
+                      $$$B
+---
+id: defensive-function-nullable-heavy
+language: python
+severity: info
+message: "Function has 2+ `if … is None: return/raise` guards threaded through its body; normalize nullability at the boundary, don't plumb `None`."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  has:
+    field: body
+    kind: block
+    all:
+      - has:
+          stopBy: end
+          kind: if_statement
+          any:
+            - pattern: |
+                if $V is None:
+                    return $$$A
+            - pattern: |
+                if $V is None:
+                    raise $$$A
+      - has:
+          stopBy: end
+          kind: if_statement
+          any:
+            - pattern: |
+                if $V2 is None:
+                    return $$$A
+            - pattern: |
+                if $V2 is None:
+                    raise $$$A
+          precedes:
+            stopBy: end
+            kind: if_statement
+            any:
+              - pattern: |
+                  if $V3 is None:
+                      return $$$A
+              - pattern: |
+                  if $V3 is None:
+                      raise $$$A
+---
+id: type-probe-ladder
+language: python
+severity: info
+message: "Two `if isinstance(same_var, T): …` branches back-to-back are a type-probe ladder; use a dispatch table or polymorphism."
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+    - pattern: |
+        if isinstance($V, $T1):
+            $$$A
+    - precedes:
+        stopBy: neighbor
+        kind: if_statement
+        pattern: |
+          if isinstance($V, $T2):
+              $$$B
+---
+id: multi-none-or-chain
+language: python
+severity: info
+message: "`if a is None or b is None [or c is None]: return/raise/continue` is defensive multi-arg null policing; normalize nullability at the boundary."
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+    - regex: 'is None\s+or\s+\w[\w.]*\s+is None'
+    - has:
+        field: consequence
+        kind: block
+        has:
+          stopBy: neighbor
+          any:
+            - kind: return_statement
+            - kind: raise_statement
+            - kind: continue_statement
+---
+id: isinstance-guard-raise
+language: python
+severity: info
+message: "Inline `if not isinstance(x, T): raise …` guards police caller types in core logic; validate at the boundary and trust the type."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: if_statement
+  any:
+    - pattern: |
+        if not isinstance($VALUE, $TYPE):
+            raise $$$ARGS
+    - pattern: |
+        if not isinstance($VALUE, ($$$TYPES)):
+            raise $$$ARGS
+---
+id: isinstance-return-constructor
+language: python
+severity: info
+message: "`if isinstance(x, T): return T(x)` re-wraps a value already of the target type; drop the guard and the wrap."
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  any:
+    - pattern: |
+        if isinstance($VALUE, $TYPE):
+            return $TYPE($VALUE)
+    - pattern: |
+        if isinstance($VALUE, $TYPE):
+            return $TYPE($$$ARGS)
+---
+id: wrap-raise-fstring
+language: python
+severity: info
+message: "`except X as e: raise MyError(f'…: {e}') from e` renames exceptions for cosmetics; let the original propagate or catch something specific."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: except_clause
+  all:
+    - regex: '^except\s+(Exception|BaseException|OSError|ValueError|TypeError|RuntimeError|KeyError|IndexError|AttributeError|ArithmeticError)(\s+as\s+\w+)?\s*:'
+    - has:
+        stopBy: neighbor
+        kind: block
+        all:
+          - has:
+              stopBy: neighbor
+              kind: raise_statement
+              has:
+                stopBy: end
+                kind: string
+                regex: '\{[^}]*\}'
+          - not:
+              has:
+                stopBy: neighbor
+                not:
+                  any:
+                    - kind: raise_statement
+                    - kind: comment
+---
+id: except-return-static-sentinel
+language: python
+severity: warning
+message: "`except Exception: return None/False/[]/{}` is bare-exception-to-sentinel; catch something specific or let it propagate."
+metadata:
+  weight: 6
+  category: slop
+  min_file_count: 2
+rule:
+  kind: except_clause
+  all:
+    - any:
+        - regex: '^except\s*:'
+        - regex: '^except\s+(Exception|BaseException)(\s+as\s+\w+)?\s*:'
+    - has:
+        stopBy: neighbor
+        kind: block
+        all:
+          - has:
+              stopBy: neighbor
+              kind: return_statement
+              regex: '^return\s+(None|False|True|\[\]|\{\}|""|0|\(\)|set\(\))\s*$'
+          - not:
+              has:
+                stopBy: neighbor
+                not:
+                  any:
+                    - kind: return_statement
+                    - kind: comment
+---
+id: triple-attr-none-default-chain
+language: python
+severity: info
+message: "`x = data.get(k, d1) or d2` double-guards a `.get` miss; pick one default path."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: assignment
+  any:
+    - pattern: |
+        $X = $DATA.get($KEY, $D1) or $D2
+    - pattern: |
+        $X = $DATA.get($KEY) or $DATA.get($KEY2) or $FALLBACK
+---
+id: redundant-coerce-to-str
+language: python
+severity: info
+message: "`str(x) if x is not None else ''` coerces a typed value; trust the annotation."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: conditional_expression
+  any:
+    - pattern: 'str($X) if $X is not None else ""'
+    - pattern: "str($X) if $X is not None else ''"
+    - pattern: 'str($X) if isinstance($X, str) else ""'
+    - pattern: "str($X) if isinstance($X, str) else ''"
+---
+id: none-continue-in-loop
+language: python
+severity: info
+message: "`if x is None: continue` inside a loop is defensive null-skipping; filter at the source or raise on contract violation."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: if_statement
+  pattern: |
+    if $X is None:
+        continue
+  inside:
+    stopBy: end
+    any:
+      - kind: for_statement
+      - kind: while_statement
+---
+id: parse-and-fallback-exception
+language: python
+severity: warning
+message: "`try: return int/float/json.loads(x) except Exception: return <default>` parse-with-silent-fallback swallows format errors."
+metadata:
+  weight: 6
+  category: slop
+  min_file_count: 2
+rule:
+  kind: try_statement
+  all:
+    - has:
+        stopBy: neighbor
+        kind: block
+        has:
+          stopBy: neighbor
+          kind: return_statement
+          any:
+            - regex: '^return\s+int\('
+            - regex: '^return\s+float\('
+            - regex: '^return\s+bool\('
+            - regex: '^return\s+json\.loads?\('
+            - regex: '^return\s+ast\.literal_eval\('
+    - has:
+        stopBy: neighbor
+        kind: except_clause
+        regex: '^except\s+(Exception|BaseException|ValueError|TypeError)(\s+as\s+\w+)?\s*:'
+---
+id: return-none-guard-ladder
+language: python
+severity: info
+message: "Back-to-back `if …: return None` guard clauses treat Optional as a pervasive escape hatch; normalize nullability at the boundary."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: if_statement
+  all:
+    - has:
+        field: consequence
+        kind: block
+        all:
+          - has:
+              stopBy: neighbor
+              kind: return_statement
+              regex: '^return\s+None\s*$'
+          - not:
+              has:
+                stopBy: neighbor
+                not:
+                  any:
+                    - kind: return_statement
+                    - kind: comment
+    - precedes:
+        stopBy: neighbor
+        kind: if_statement
+        has:
+          field: consequence
+          kind: block
+          all:
+            - has:
+                stopBy: neighbor
+                kind: return_statement
+                regex: '^return\s+None\s*$'
+            - not:
+                has:
+                  stopBy: neighbor
+                  not:
+                    any:
+                      - kind: return_statement
+                      - kind: comment
+---
+id: raise-guard-ladder
+language: python
+severity: info
+message: "Back-to-back `if <cond>: raise ...` guard clauses that raise different error messages are defensive input policing; push validation to the boundary."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: if_statement
+  all:
+    - has:
+        field: consequence
+        kind: block
+        all:
+          - has:
+              stopBy: neighbor
+              kind: raise_statement
+          - not:
+              has:
+                stopBy: neighbor
+                not:
+                  any:
+                    - kind: raise_statement
+                    - kind: comment
+    - precedes:
+        stopBy: neighbor
+        kind: if_statement
+        has:
+          field: consequence
+          kind: block
+          all:
+            - has:
+                stopBy: neighbor
+                kind: raise_statement
+            - not:
+                has:
+                  stopBy: neighbor
+                  not:
+                    any:
+                      - kind: raise_statement
+                      - kind: comment
+---
+id: function-with-many-type-guards
+language: python
+severity: info
+message: "Function has 3+ `if not isinstance / if x is None: raise` guard clauses before doing work; validate at the boundary and trust the type downstream."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  has:
+    field: body
+    kind: block
+    all:
+      - has:
+          stopBy: neighbor
+          kind: if_statement
+          any:
+            - pattern: |
+                if not isinstance($V1, $T1):
+                    raise $$$A1
+            - pattern: |
+                if not isinstance($V1, ($$$T1)):
+                    raise $$$A1
+      - has:
+          stopBy: neighbor
+          kind: if_statement
+          any:
+            - pattern: |
+                if not isinstance($V2, $T2):
+                    raise $$$A2
+            - pattern: |
+                if not isinstance($V2, ($$$T2)):
+                    raise $$$A2
+---
+id: sentinel-fallback-function
+language: python
+severity: warning
+message: "Whole-function `try: <work>; except Exception: return None/False/[]/{}` swallows every error and returns a sentinel; catch specifically or let it propagate."
+metadata:
+  weight: 6
+  category: slop
+  min_file_count: 2
+rule:
+  kind: function_definition
+  has:
+    field: body
+    kind: block
+    all:
+      - has:
+          stopBy: neighbor
+          kind: try_statement
+          all:
+            - has:
+                stopBy: neighbor
+                kind: except_clause
+                all:
+                  - any:
+                      - regex: '^except\s*:'
+                      - regex: '^except\s+(Exception|BaseException)(\s+as\s+\w+)?\s*:'
+                  - has:
+                      stopBy: neighbor
+                      kind: block
+                      all:
+                        - has:
+                            stopBy: neighbor
+                            kind: return_statement
+                            regex: '^return\s+(None|False|True|\[\]|\{\}|""|0|\(\)|set\(\))\s*$'
+                        - not:
+                            has:
+                              stopBy: neighbor
+                              not:
+                                any:
+                                  - kind: return_statement
+                                  - kind: comment
+      - not:
+          has:
+            stopBy: neighbor
+            any:
+              - kind: for_statement
+              - kind: while_statement
+              - kind: match_statement
+              - kind: with_statement
+---
+id: dispatch-by-string-equality
+language: python
+severity: info
+message: "Long `if op == \"X\":` / `elif op == \"Y\":` string-equality dispatch is open-coded command routing; use a `{name: handler}` table."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: if_statement
+  all:
+    - any:
+        - regex: '^if\s+\w+\s*==\s*"[A-Z_][A-Z0-9_]*"'
+        - regex: "^if\\s+\\w+\\s*==\\s*'[A-Z_][A-Z0-9_]*'"
+    - precedes:
+        stopBy: neighbor
+        kind: if_statement
+        any:
+          - regex: '^if\s+\w+\s*==\s*"[A-Z_][A-Z0-9_]*"'
+          - regex: "^if\\s+\\w+\\s*==\\s*'[A-Z_][A-Z0-9_]*'"
+---
+id: go-style-err-tuple-return
+language: python
+severity: info
+message: "`return None, error_msg` / `return None, None` Go-style dual-return open-codes an ad-hoc result type; raise exceptions or use a real result object."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: return_statement
+  any:
+    - pattern: 'return None, None'
+    - pattern: 'return None, $MSG'
+    - pattern: 'return False, $MSG'
+    - pattern: 'return True, $MSG'
+  not:
+    any:
+      - has:
+          stopBy: end
+          kind: call
+---
+id: len-arity-raise
+language: python
+severity: info
+message: "`if len(args) != N: raise …` open-codes arity checks; bind via parameters or `*args` unpacking so the error is structural."
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 2
+rule:
+  kind: if_statement
+  any:
+    - pattern: |
+        if len($ARGS) != $N:
+            raise $$$A
+    - pattern: |
+        if len($ARGS) < $N:
+            raise $$$A
+    - pattern: |
+        if len($ARGS) > $N:
+            raise $$$A
+---
+id: chained-dict-get
+language: python
+severity: info
+message: "`.get().get()` chain - extract helper or use `operator.itemgetter` / try-except KeyError"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: call
+  has:
+    kind: attribute
+    has:
+      kind: call
+      has:
+        kind: attribute
+        regex: \.get$
+    regex: \.get$
+---
+id: repeated-dict-key-assignment
+language: python
+severity: info
+message: "Repeated `d[k] = f(...)` lines - use a loop or dict comprehension"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: expression_statement
+  has:
+    kind: assignment
+    pattern: $DICT[$KEY] = $FUNC($$$)
+  follows:
+    kind: expression_statement
+    has:
+      kind: assignment
+      pattern: $DICT[$KEY2] = $FUNC($$$)
+---
+id: dict-get-zero-default
+language: python
+severity: info
+message: "`d.get(k, 0)` - use a defaultdict(int) instead or a try/except KeyError guard."
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: call
+  all:
+  - has:
+      kind: attribute
+      regex: \.get$
+  - has:
+      kind: argument_list
+      has:
+        kind: integer
+        regex: ^0$
+        nthChild:
+          position: 2
+---
+id: dict-get-empty-string-default
+language: python
+severity: info
+message: "`x = d.get(k, ''); if x:` - conflates missing key with empty value; use `.get(k)` and `is not None`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: expression_statement
+  pattern: $X = $D.get($K, "")
+  precedes:
+    kind: if_statement
+    pattern: |
+      if $X:
+          $$$BODY
+---
+id: dict-get-empty-list-default
+language: python
+severity: info
+message: "`d.get(k, [])` - builds a fresh list each call; use `d.setdefault(k, [])` or `defaultdict(list)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: call
+  all:
+  - has:
+      kind: attribute
+      regex: \.get$
+  - has:
+      kind: argument_list
+      has:
+        kind: list
+        not:
+          has:
+            any:
+            - kind: identifier
+            - kind: integer
+            - kind: string
+        nthChild:
+          position: 2
+---
+id: dict-get-empty-dict-default
+language: python
+severity: info
+message: "`d.get(k, {})` - builds a fresh dict each call; use `d.setdefault(k, {})` or `defaultdict(dict)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: call
+  all:
+  - has:
+      kind: attribute
+      regex: \.get$
+  - has:
+      kind: argument_list
+      has:
+        kind: dictionary
+        not:
+          has:
+            kind: pair
+        nthChild:
+          position: 2
+---
+id: dict-get-default-none
+language: python
+severity: warning
+message: "`d.get(k, None)` - drop the `None`, it is already the default"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  all:
+  - has:
+      kind: attribute
+      regex: \.get$
+  - has:
+      kind: argument_list
+      has:
+        kind: none
+        nthChild:
+          position: 2
+---
+id: check-key-in-dict-keys
+language: python
+severity: warning
+message: "`k in d.keys()` - use `k in d`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: comparison_operator
+  regex: \sin\s
+  has:
+    kind: call
+    has:
+      kind: attribute
+      regex: \.keys$
+---
+id: list-dict-keys
+language: python
+severity: warning
+message: "`list(d.keys())` - use `list(d)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  all:
+  - has:
+      kind: identifier
+      regex: ^list$
+  - has:
+      kind: argument_list
+      has:
+        kind: call
+        has:
+          kind: attribute
+          regex: \.keys$
+---
+id: manual-dict-setdefault
+language: python
+severity: info
+message: "`if k not in d: d[k] = v` - use `d.setdefault(k, v)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern: |
+      if $K not in $D:
+          $D[$K] = $V
+  - pattern: "if $K not in $D: $D[$K] = $V"
+---
+id: verbose-dict-key-access
+language: python
+severity: info
+message: "`if k in d: v = d[k]` - use `v = d.get(k)` (or `d.get(k, default)`)"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  pattern: "if \"$KEY\" in $DICT:\n    $VAR = $DICT[\"$KEY\"]\n"
+---
+id: verbose-dict-update
+language: python
+severity: info
+message: "Single-statement `d[k] = v` loop - use `{k: v for ... in ...}` comprehension"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern: |
+      for $V in $IT:
+          $D[$K] = $EXPR
+  - pattern: |
+      for $V in $IT:
+          if $COND:
+              continue
+          $D[$K] = $EXPR
+  - pattern: |
+      for $V in $IT:
+          if $COND:
+              $D[$K] = $EXPR
+---
+id: verbose-dict-elif-updates
+language: python
+severity: info
+message: "`d[k] = v` in each if/elif branch - use a dispatch `{cond: (k, v)}` or helper"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  pattern: "if $COND1:\n  $$$PRE1\n  $D[$KEY1] = $VAL1\n  $$$POST1\nelif $COND2:\n\
+    \  $$$PRE2\n  $D[$KEY2] = $VAL2\n  $$$POST2\n"
+---
+id: verbose-dict-iteration
+language: python
+severity: warning
+message: "`for k in d.keys()` - use `for k in d`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: for_statement
+  pattern: "for $KEY in $DICT.keys():\n    $$$BODY\n"
+---
+id: items-unused-value
+language: python
+severity: warning
+message: "`for k, _ in d.items()` - use `for k in d`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: for_statement
+  pattern: "for $KEY, _ in $DICT.items():\n    $$$BODY\n"
+---
+id: items-unused-key
+language: python
+severity: warning
+message: "`for _, v in d.items()` - use `for v in d.values()`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: for_statement
+  pattern: "for _, $VAL in $DICT.items():\n    $$$BODY\n"
+---
+id: manual-dict-get-assign
+language: python
+severity: warning
+message: "`if k in d: v = d[k] else: v = default` - use `v = d.get(k, default)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: "if $KEY in $DICT:\n    $OUT = $DICT[$KEY]\nelse:\n    $OUT = $DEFAULT\n"
+---
+id: manual-dict-counter-if-else
+language: python
+severity: info
+message: "Manual dict counter - use `d[k] = d.get(k, 0) + 1` or `collections.Counter(iterable)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern: "if $KEY in $DICT:\n    $DICT[$KEY] += 1\nelse:\n    $DICT[$KEY] = 1\n"
+  - pattern: "$DICT[$KEY] = $DICT.get($KEY, 0) + 1"
+---
+id: sorted-dict-keys-wrap
+language: python
+severity: warning
+message: "`sorted(d.keys())` - use `sorted(d)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: sorted($DICT.keys())
+---
+id: sorted-key-indexed-dict-comprehension
+language: python
+severity: warning
+message: "`{k: d[k] for k in sorted(d.keys())}` - use `dict(sorted(d.items()))`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  any:
+  - pattern: '{$K: $DICT[$K] for $K in sorted($DICT.keys())}'
+  - pattern: '{$K: $F($DICT[$K]) for $K in sorted($DICT.keys())}'
+---
+id: dict-comprehension-from-keys
+language: python
+severity: info
+message: "`dict.fromkeys(keys, val)` - use `{k: val for k in keys}` (and never with a mutable `val`, it is shared)"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: call
+  pattern: dict.fromkeys($KEYS, $VAL)
+---
+id: dict-get-default-inside-keyerror-try
+language: python
+severity: warning
+message: "`d.get(k, default)` inside `try/except KeyError` - the default is unreachable; drop it or drop the except"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  all:
+  - pattern: $D.get($K, $DEFAULT)
+  - inside:
+      stopBy: end
+      kind: try_statement
+      has:
+        kind: except_clause
+        regex: KeyError
+---
+id: deep-dict-access
+language: python
+severity: info
+message: "4+ levels of `d[a][b][c][d]` - use a dataclass or `operator.itemgetter`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: subscript
+  has:
+    kind: subscript
+    has:
+      kind: subscript
+      has:
+        kind: subscript
+---
+id: get-then-none-check
+language: python
+severity: info
+message: "`v = d.get(k); if v is None:` - use `if k in d:` or try/except KeyError"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - pattern: |
+      if $V is None:
+          $$$BODY
+  - follows:
+      stopBy: neighbor
+      kind: expression_statement
+      has:
+        pattern: $V = $D.get($K)
+---
+id: init-populate-iterate-dict
+language: python
+severity: info
+message: "Create-populate-iterate `$DICT` - use `{k: v for ...}` or skip the intermediate dict"
+note: 'Consider refactoring to:
+
+  1. Dict comprehension: {key: val for item in items}
+
+  2. Helper function: def build_lookup(items) -> dict
+
+  3. Inline the logic if the intermediate dict isn''t needed elsewhere
+
+  '
+metadata:
+  weight: 1
+  category: slop
+rule:
+  pattern: "for $VARS in $DICT.$METHOD():\n    $$$BODY\n"
+  follows:
+    all:
+    - kind: for_statement
+    - has:
+        kind: subscript
+        all:
+        - has:
+            kind: identifier
+            field: value
+            pattern: $DICT
+        - inside:
+            kind: assignment
+            field: left
+        stopBy: end
+    - follows:
+        kind: expression_statement
+        has:
+          kind: assignment
+          all:
+          - has:
+              kind: identifier
+              field: left
+              pattern: $DICT
+          - has:
+              kind: dictionary
+              field: right
+              not:
+                has:
+                  kind: pair
+        stopBy:
+          kind: for_statement
+    stopBy: end
+constraints:
+  METHOD:
+    regex: ^(items|keys|values)$
+---
+id: sorted-items-default-key
+language: python
+severity: warning
+message: "sorted(..., key=lambda i: i[0]) / `(i[0], i[1])` - default sort already matches; drop the key"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  any:
+  - pattern: "sorted($D.items(), key=lambda $I: $I[0])"
+  - pattern: "sorted($XS, key=lambda $I: ($I[0], $I[1]))"
+  - pattern: "sorted($XS, key=lambda $I: ($I[0], $I[1], $I[2]))"
+---
+id: identity-dict-comprehension
+language: python
+severity: warning
+message: "{k: v for k, v in d.items()} is just dict(d)"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: "{$K: $V for $K, $V in $D.items()}"
+---
+id: dict-from-pairs-loop
+language: python
+severity: warning
+message: "`for k, v in pairs: d[k] = v` - use `d = dict(pairs)` (or `d.update(pairs)` if merging)"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: |
+    for $K, $V in $PAIRS:
+        $D[$K] = $V
+---
+id: update-if-present-dict
+language: python
+severity: info
+message: "`if x is not None: updates[k] = x` for each arg - drop the optional defaulting or pass `**kwargs` through"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  all:
+  - pattern: |
+      if $A is not None:
+          $U[$K1] = $A
+  - precedes:
+      stopBy: neighbor
+      kind: if_statement
+      pattern: |
+        if $B is not None:
+            $U[$K2] = $B
+---
+id: comprehension-used-but-ignored-result
+language: python
+severity: warning
+message: "Comprehension result discarded - use a `for` loop for side effects"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: expression_statement
+  has:
+    any:
+    - kind: list_comprehension
+    - kind: set_comprehension
+    - kind: dictionary_comprehension
+    - kind: generator_expression
+---
+id: for-range-len
+language: python
+severity: warning
+message: "`for i in range(len(x))` - use `enumerate(x)` or iterate `x` directly"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: "for $I in range(len($SEQ)):\n  $$$\n"
+---
+id: unnecessary-list-call
+language: python
+severity: warning
+message: "`for x in list(iterable)` - drop `list()`, `for` iterates directly"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: for_statement
+  has:
+    kind: call
+    has:
+      kind: identifier
+      regex: ^list$
+---
+id: list-map-filter
+language: python
+severity: info
+message: "`list(map(f, xs))` / `list(filter(p, xs))` - use a list comprehension"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: call
+  all:
+  - has:
+      kind: identifier
+      regex: ^list$
+  - has:
+      kind: argument_list
+      has:
+        kind: call
+        has:
+          kind: identifier
+          regex: ^(map|filter)$
+---
+id: listcomp-in-builtin-call
+language: python
+severity: warning
+message: "`all/any/sum/set/dict([...])` - drop brackets for a generator expression"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  all:
+  - has:
+      kind: identifier
+      regex: ^(all|any|sum|set|dict)$
+  - has:
+      kind: argument_list
+      has:
+        kind: list_comprehension
+---
+id: membership-test-list-literal
+language: python
+severity: info
+message: "`x in [a, b, c, d]` - use a set literal `{a, b, c, d}` for O(1) lookup"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: comparison_operator
+  pattern: $X in [$A, $B, $C, $D, $$$REST]
+---
+id: list-wrap-list
+language: python
+severity: warning
+message: "`list([a, b, c])` is redundant - just use `[a, b, c]`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: list([$$$ARGS])
+---
+id: set-literal-list
+language: python
+severity: warning
+message: "`set([a, b, c])` - use set literal `{a, b, c}`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  all:
+    - has:
+        field: function
+        regex: '^set$'
+    - has:
+        kind: argument_list
+        has:
+          kind: list
+---
+id: list-self-concat
+language: python
+severity: warning
+message: "`lst = lst + [x]` - use `lst.append(x)` (avoids copying the whole list)"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: $LIST = $LIST + [$ITEM]
+---
+id: list-extend-from-loop
+language: python
+severity: warning
+message: "`for x in it: lst.append(x)` - use `lst.extend(it)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: for_statement
+  pattern: "for $ITEM in $ITER:\n    $LIST.append($ITEM)\n"
+---
+id: join-list-literal
+language: python
+severity: warning
+message: "`''.join([...])` materializes a list first - pass the iterable directly"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  all:
+    - has:
+        kind: attribute
+        regex: \.join$
+    - has:
+        field: arguments
+        has:
+          kind: list_comprehension
+---
+id: join-list-comprehension
+language: python
+severity: warning
+message: "`''.join([x for ...])` - drop brackets for a generator expression"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  all:
+  - has:
+      kind: attribute
+      regex: \.join$
+  - has:
+      kind: argument_list
+      has:
+        kind: list_comprehension
+---
+id: manual-sum-loop
+language: python
+severity: info
+message: "`total = 0; for x in it: total += expr` - use `sum(expr for x in it)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: for_statement
+  pattern: "for $ITEM in $ITER:\n    $TOTAL += $EXPR\n"
+  follows:
+    kind: expression_statement
+    has:
+      kind: assignment
+      pattern: $TOTAL = 0
+    stopBy: neighbor
+---
+id: manual-count-loop
+language: python
+severity: info
+message: "`count = 0; for x in it: count += 1` - use `sum(1 for x in it if cond)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: for_statement
+  pattern: "for $ITEM in $ITER:\n    $COUNT += 1\n"
+  follows:
+    kind: expression_statement
+    has:
+      kind: assignment
+      pattern: $COUNT = 0
+    stopBy: neighbor
+---
+id: set-add-loop
+language: python
+severity: info
+message: "`for x in it: s.add(v)` - use set comprehension `{v for x in it}`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: for_statement
+  pattern: "for $ITEM in $ITER:\n    $SET.add($VAL)\n"
+---
+id: sorted-list-comprehension-wrap
+language: python
+severity: warning
+message: "`sorted([x for ...])` - drop brackets for generator expression `sorted(x for ...)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  any:
+  - pattern: sorted([$X for $Y in $ITER])
+  - pattern: sorted([$X for $Y in $ITER if $COND])
+---
+id: set-generator-wrap
+language: python
+severity: warning
+message: "`set(x for x in it)` - use set comprehension `{x for x in it}`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  any:
+  - pattern: set($X for $Y in $ITER)
+  - pattern: set($X for $Y in $ITER if $COND)
+---
+id: redundant-list-comprehension
+language: python
+severity: warning
+message: "`[x for x in iter]` - use `list(iter)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: list_comprehension
+  pattern: '[$X for $X in $ITER]'
+---
+id: consecutive-append-calls
+language: python
+severity: info
+message: "Consecutive `.append()` calls - use `.extend([a, b, c])`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: expression_statement
+  has:
+    kind: call
+    has:
+      kind: attribute
+      regex: \.append$
+  follows:
+    kind: expression_statement
+    has:
+      kind: call
+      has:
+        kind: attribute
+        regex: \.append$
+    stopBy: neighbor
+---
+id: verbose-list-append-loop
+language: python
+severity: info
+message: "Single-statement append loop - use `[expr for ... in ...]` comprehension"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern: |
+      for $V in $IT:
+          $OUT.append($EXPR)
+  - pattern: |
+      for $V in $IT:
+          if $COND:
+              continue
+          $OUT.append($EXPR)
+  - pattern: |
+      for $V in $IT:
+          if $COND:
+              $OUT.append($EXPR)
+---
+id: init-populate-iterate-list
+language: python
+severity: info
+message: "Create-append-iterate `$LIST` - use `[expr for ...]` or skip the intermediate list"
+note: 'Consider refactoring to:
+
+  1. List comprehension: [val for item in items if cond]
+
+  2. Helper function: def collect_items(source) -> list
+
+  3. Generator expression if only iterating once: (val for item in items)
+
+  '
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: for_statement
+  all:
+  # tighten: only suggest this when the consumer loop body is a single statement
+  # (multi-step consumers are often clearer as explicit loops)
+  - pattern: |
+      for $VAR in $LIST:
+          $STMT
+  - has:
+      kind: block
+      all:
+      - not:
+          has:
+            nthChild:
+              position: 2
+      - not:
+          has:
+            any:
+            - kind: if_statement
+            - kind: for_statement
+            - kind: while_statement
+            - kind: try_statement
+            - kind: with_statement
+            - kind: match_statement
+  - not:
+      has:
+        kind: call
+        has:
+          kind: attribute
+          regex: \.(items|keys|values)$
+  - follows:
+      all:
+      - kind: for_statement
+      - has:
+          kind: call
+          has:
+            kind: attribute
+            all:
+            - has:
+                kind: identifier
+                field: object
+                pattern: $LIST
+            - has:
+                field: attribute
+                regex: ^append$
+          stopBy: end
+      - follows:
+          kind: expression_statement
+          has:
+            kind: assignment
+            all:
+            - has:
+                kind: identifier
+                field: left
+                pattern: $LIST
+            - has:
+                kind: list
+                field: right
+                not:
+                  has:
+                    any:
+                    - kind: identifier
+                    - kind: string
+                    - kind: integer
+          stopBy:
+            kind: for_statement
+      stopBy: end
+---
+id: materialize-then-sort-return
+language: python
+severity: info
+message: "`tmp = [...]; return sorted(tmp)` - use `return sorted(x for ... in ...)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: return_statement
+  pattern: return sorted($TMP)
+  follows:
+    kind: expression_statement
+    has:
+      kind: assignment
+      any:
+      - pattern: $TMP = [$X for $Y in $ITER]
+      - pattern: $TMP = [$X for $Y in $ITER if $COND]
+    stopBy: neighbor
+---
+id: manual-find-return-none
+language: python
+severity: info
+message: "`for x in it: if c: return r; return None` - use `next((r for x in it if c), None)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: for_statement
+  pattern: |
+    for $ITEM in $ITER:
+        if $COND:
+            return $RET
+  precedes:
+    kind: return_statement
+    pattern: return None
+    stopBy: neighbor
+---
+id: verbose-missing-remove-loop
+language: python
+severity: info
+message: "Copy-list-then-remove to find missing items - use `set(required) - set(target)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: for_statement
+  pattern: "for $ITEM in $REQ:\n  if $ITEM in $TARGET:\n    $MISSING.remove($ITEM)\n"
+  follows:
+    kind: expression_statement
+    has:
+      pattern: $MISSING = list($REQ)
+    stopBy: end
+---
+id: frozenset-list-wrap
+language: python
+severity: warning
+message: "`frozenset([...])` - pass the iterable directly, drop the list"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  all:
+  - has:
+      kind: identifier
+      regex: ^frozenset$
+  - has:
+      kind: argument_list
+      has:
+        any:
+        - kind: list
+        - kind: list_comprehension
+---
+id: verbose-range-zero-start
+language: python
+severity: warning
+message: "`range(0, n)` - use `range(n)`, `0` is the default start"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: range(0, $END)
+---
+id: verbose-sorted-list
+language: python
+severity: warning
+message: "`sorted(list(x))` - use `sorted(x)`, it already returns a new list"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: sorted(list($X))
+---
+id: redundant-continue
+language: python
+severity: warning
+message: "`continue` at end of loop body - delete it, the loop iterates anyway"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: block
+  regex: continue\s*$
+  inside:
+    any:
+    - kind: for_statement
+    - kind: while_statement
+---
+id: long-tuple-unpacking
+language: python
+severity: info
+message: "Unpacking 5+ values from a tuple - use a `NamedTuple` or `@dataclass`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: assignment
+  has:
+    kind: pattern_list
+    has:
+      nthChild:
+        position: 5
+---
+id: manual-index-unpack
+language: python
+severity: warning
+message: "`a = pair[0]; b = pair[1]` - use tuple unpacking `a, b = pair`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: expression_statement
+  has:
+    kind: assignment
+    pattern: $A = $PAIR[0]
+  precedes:
+    kind: expression_statement
+    has:
+      kind: assignment
+      pattern: $B = $PAIR[1]
+    stopBy: neighbor
+---
+id: split-magic-index
+language: python
+severity: info
+message: "`s.split()[N]` with magic index - unpack into named vars (`a, b, c = s.split()`)"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: subscript
+  all:
+  - has:
+      kind: call
+      has:
+        kind: attribute
+        regex: \.split$
+  - has:
+      kind: integer
+      regex: ^([2-9]|[1-9][0-9]+)$
+---
+id: slice-assign-listcomp-self
+language: python
+severity: info
+message: "`lst[:] = [.. for .. in lst]` mutates a list while reading it - prefer assigning a new list unless in-place mutation is required"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern: $LIST[:] = [$VAL for $ITEM in $LIST]
+  - pattern: $LIST[:] = [$VAL for $ITEM in $LIST if $COND]
+---
+id: redundant-blank-check
+language: python
+severity: info
+message: "`line.isspace() or not line` then `line.strip()` `if not text` - one `if not line.strip(): continue` is enough"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: if_statement
+  pattern: |
+    if $L.isspace() or not $L:
+        continue
+  precedes:
+    stopBy: neighbor
+    kind: expression_statement
+    has:
+      kind: assignment
+      pattern: $T = $L.strip()
+    precedes:
+      stopBy: neighbor
+      kind: if_statement
+      pattern: |
+        if not $T:
+            continue
+---
+id: manual-set-union-loop
+language: python
+severity: info
+message: "`s = set(); for r in it: s.update(r.X())` - use `set().union(*(r.X() for r in it))` or a comprehension"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: expression_statement
+  has:
+    kind: assignment
+    pattern: $S = set()
+  precedes:
+    stopBy: neighbor
+    kind: for_statement
+    pattern: |
+      for $R in $COLL:
+          $S.update($R.$METHOD())
+---
+id: fixed-chunk-file-hash
+language: python
+severity: warning
+message: "`while True: chunk = f.read(N); if not chunk: break; h.update(chunk)` - use `hashlib.file_digest(f, ALGO)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: while_statement
+  pattern: |
+    while True:
+        $CHUNK = $F.read($N)
+        if not $CHUNK:
+            break
+        $H.update($CHUNK)
+---
+id: pointless-lambda-call
+language: python
+severity: warning
+message: "Immediately-invoked lambda `(lambda: ...)()` - inline the expression"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  has:
+    kind: parenthesized_expression
+    has:
+      kind: lambda
+---
+id: unnecessary-lambda
+language: python
+severity: warning
+message: "`lambda x: f(x)` - pass `f` directly"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: lambda
+  pattern: 'lambda $ARG: $FN($ARG)'
+---
+id: empty-init
+language: python
+severity: warning
+message: "Empty `__init__` - delete it, Python provides a default constructor"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: function_definition
+  all:
+  - has:
+      kind: identifier
+      regex: ^__init__$
+  - has:
+      kind: block
+      has:
+        kind: pass_statement
+---
+id: redundant-return-none
+language: python
+severity: info
+message: "`return None` at end of function - drop it, `None` returns implicitly"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: return_statement
+  pattern: return None
+  inside:
+    kind: block
+    inside:
+      kind: function_definition
+  not:
+    precedes:
+      stopBy: neighbor
+      any:
+      - kind: expression_statement
+      - kind: return_statement
+      - kind: if_statement
+      - kind: for_statement
+      - kind: while_statement
+      - kind: try_statement
+      - kind: with_statement
+      - kind: raise_statement
+---
+id: swallow-exception-pass-multi-stmt
+language: python
+severity: warning
+message: "`except ...: pass` after multi-step work hides real failures; catch specific errors or log"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  any:
+  - pattern: |
+      try:
+        $FIRST
+        $SECOND
+        $$$REST
+      except Exception:
+        pass
+  - pattern: |
+      try:
+        $FIRST
+        $SECOND
+        $$$REST
+      except Exception as $ERR:
+        pass
+  - pattern: |
+      try:
+        $FIRST
+        $SECOND
+        $$$REST
+      except:
+        pass
+---
+id: tokenizer-char-append-branch
+language: python
+severity: info
+message: "Per-char tokenizer branches with `append` + `pos += 1` - use `{char: TokenType}` lookup table"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: expression_statement
+  has:
+    pattern: $OBJ.tokens.append($NEW_TOKEN)
+  precedes:
+    kind: expression_statement
+    has:
+      pattern: $OBJ.pos += 1
+---
+id: except-bare-reraise
+language: python
+severity: warning
+message: Catching an exception only to re-raise it adds noise; drop the try/except
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: except_clause
+  has:
+    kind: block
+    regex: "^\\s*raise\\s*$"
+---
+id: except-pass-silence
+language: python
+severity: warning
+message: except clause with bare pass silently swallows errors
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: except_clause
+  has:
+    kind: block
+    has:
+      kind: pass_statement
+---
+id: except-oserror-ioerror-pair
+language: python
+severity: warning
+message: IOError is an alias for OSError since Py3.3; drop the pair
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: except_clause
+  regex: "\\(OSError,\\s*IOError\\)|\\(IOError,\\s*OSError\\)"
+---
+id: pragma-no-cover-defensive
+language: python
+severity: info
+message: pragma no cover suppresses coverage on dead branches; remove the branch instead
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: comment
+  regex: "pragma:\\s*no\\s+cover"
+---
+id: per-method-assert-not-none
+language: python
+severity: info
+message: assert self.X is not None at method entry - enforce in __init__ once
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: assert_statement
+  pattern: "assert self.$F is not None"
+---
+id: del-unused-param
+language: python
+severity: warning
+message: del on a named parameter inside a function silences unused-param lint - drop from signature
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: delete_statement
+  not:
+    has:
+      any:
+      - kind: subscript
+      - kind: attribute
+      - kind: call
+  inside:
+    kind: function_definition
+    stopBy: end
+---
+id: wrapper-isvalid-oneliner
+language: python
+severity: info
+message: One-line is_valid_X wrapping a regex match/search/fullmatch adds no value
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: function_definition
+  all:
+  - has:
+      kind: identifier
+      regex: "^is_valid"
+  - has:
+      kind: block
+      has:
+        kind: return_statement
+        regex: "bool\\(.*\\.(match|fullmatch|search)\\("
+---
+id: manual-removeprefix-replace
+language: python
+severity: warning
+message: s.replace(p, '') if s.startswith(p) else s - use str.removeprefix
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: "$S.replace($P, $EMPTY) if $S.startswith($P) else $S"
+---
+id: section-banner-comment
+language: python
+severity: info
+message: Decorative section banner comment - delete, let structure speak for itself
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: comment
+  regex: "^#\\s*[-=─]{10,}\\s*$"
+---
+id: dataclass-count-explosion
+language: python
+severity: info
+message: "@dataclass decorator - 10+ in one file suggests TypedDict or consolidation target"
+metadata:
+  weight: 1
+  category: slop
+  min_file_count: 10
+rule:
+  kind: decorator
+  regex: "^@dataclass"
+---
+id: dataclass-few-attributes
+language: python
+severity: info
+message: "@dataclass with <=2 scalar attributes - use a NamedTuple or tuple unless you need mutability"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: class_definition
+  all:
+  - inside:
+      kind: decorated_definition
+      stopBy: neighbor
+      has:
+        kind: decorator
+        regex: "^@dataclass"
+  - has:
+      kind: block
+      all:
+      - not:
+          has:
+            nthChild:
+              position: 3
+      - not:
+          has:
+            stopBy: end
+            kind: generic_type
+---
+id: dataclass-tagged-union-discriminator
+language: python
+severity: info
+message: "@dataclass with `kind: str` + multiple Optional fields - model as distinct types or a Literal discriminator"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern: |
+      @dataclass
+      class $C:
+          $K: str
+          $N1: Optional[$$$T1] = $$$D1
+          $N2: Optional[$$$T2] = $$$D2
+  - pattern: |
+      @dataclass
+      class $C:
+          $K: str
+          $N1: Optional[$$$T1] = $$$D1
+          $N2: Optional[$$$T2] = $$$D2
+          $$$REST
+  - pattern: |
+      @dataclass($$$A)
+      class $C:
+          $K: str
+          $N1: Optional[$$$T1] = $$$D1
+          $N2: Optional[$$$T2] = $$$D2
+  - pattern: |
+      @dataclass($$$A)
+      class $C:
+          $K: str
+          $N1: Optional[$$$T1] = $$$D1
+          $N2: Optional[$$$T2] = $$$D2
+          $$$REST
+constraints:
+  K:
+    regex: "^(kind|type|tag)$"
+---
+id: empty-exception-subclass
+language: python
+severity: info
+message: "Empty Error/Exception/Warning subclass - use one base error and pass context in the message"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: class_definition
+  all:
+  - has:
+      kind: argument_list
+      regex: "(Error|Exception|Warning)"
+  - not:
+      has:
+        kind: function_definition
+        stopBy: end
+  - not:
+      has:
+        kind: decorated_definition
+        stopBy: end
+        has:
+          kind: function_definition
+---
+id: identity-wrapper-function
+language: python
+severity: info
+message: "`def f(x): return g(x)` - identity wrapper adds no value; call the inner function directly"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern: |
+      def $NAME($ARG):
+          return $CALL($ARG)
+  - pattern: |
+      def $NAME($ARG) -> $T2:
+          return $CALL($ARG)
+  - pattern: |
+      def $NAME($ARG: $T1):
+          return $CALL($ARG)
+  - pattern: |
+      def $NAME($ARG: $T1) -> $T2:
+          return $CALL($ARG)
+  not:
+    inside:
+      kind: decorated_definition
+      stopBy: neighbor
+---
+id: predicate-isinstance-wrapper
+language: python
+severity: info
+message: "`def is_X(v) -> bool: return isinstance(v, T)` - inline the isinstance check; the wrapper adds no value"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern: |
+      def $NAME($ARG) -> bool:
+          return isinstance($ARG, $T)
+  - pattern: |
+      def $NAME($ARG: $_) -> bool:
+          return isinstance($ARG, $T)
+---
+id: lambda-generator-throw
+language: python
+severity: warning
+message: "`(_ for _ in ()).throw(...)` - raise inside a lambda via generator hack; use `def helper(): raise ...`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: "(_ for _ in ()).throw($_)"
+---
+id: oswalk-relpath-sep-replace
+language: python
+severity: info
+message: "`os.walk` + `os.path.relpath` + `.replace(os.sep, '/')` - use `Path(root).rglob('*')` and `.relative_to(root).as_posix()`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: for_statement
+  all:
+  - has:
+      kind: call
+      stopBy: end
+      regex: "os\\.walk"
+  - has:
+      stopBy: end
+      regex: "os\\.path\\.relpath"
+  - has:
+      stopBy: end
+      regex: "\\.replace\\(os\\.sep"
+---
+id: generic-with-any
+language: python
+severity: info
+message: "`<Container>[..., Any, ...]` - specify concrete element types or use a `TypedDict`/`@dataclass`/`Protocol`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern:
+      context: "x: $C[Any]"
+      selector: type
+  - pattern:
+      context: "x: $C[Any, $$$A]"
+      selector: type
+  - pattern:
+      context: "x: $C[$$$A, Any]"
+      selector: type
+  - pattern:
+      context: "x: $C[$$$A, Any, $$$B]"
+      selector: type
+constraints:
+  C:
+    not:
+      any:
+      - regex: "^Union$"
+      - regex: "^Optional$"
+      - regex: "^Callable$"
+---
+id: union-with-any
+language: python
+severity: warning
+message: "`Union[..., Any]` / `... | Any` - drop `Any`, it subsumes every other member"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  any:
+  - pattern:
+      context: "x: Union[Any, $$$A]"
+      selector: type
+  - pattern:
+      context: "x: Union[$$$A, Any]"
+      selector: type
+  - pattern:
+      context: "x: Union[$$$A, Any, $$$B]"
+      selector: type
+  - pattern:
+      context: "x: Any | $T"
+      selector: type
+  - pattern:
+      context: "x: $T | Any"
+      selector: type
+constraints:
+  T:
+    not:
+      regex: "^None$"
+---
+id: optional-any
+language: python
+severity: warning
+message: "`Optional[Any]` / `Any | None` - reduces to `Any`; drop the wrapper"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  any:
+  - pattern:
+      context: "x: Optional[Any]"
+      selector: type
+  - pattern:
+      context: "x: Any | None"
+      selector: type
+  - pattern:
+      context: "x: None | Any"
+      selector: type
+---
+id: callable-any-return
+language: python
+severity: info
+message: "`Callable[..., Any]` - specify the return type; `...` already erases the parameter signature"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  any:
+  - pattern:
+      context: "x: Callable[..., Any]"
+      selector: type
+  - pattern:
+      context: "x: Callable[$P, Any]"
+      selector: type
+---
+id: object-type-annotation
+language: python
+severity: info
+message: "`object` annotation - use a concrete type, `Protocol`, or `Any`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  kind: type
+  any:
+  - regex: ^object$
+  - regex: ^"object"$
+  - regex: ^'object'$
+  - regex: ^builtins\.object$
+---
+id: legacy-typing-capitalized-imports
+language: python
+severity: warning
+message: "Deprecated `typing` import - use built-ins (list/dict/tuple/set/type), `collections.*`, or `X | Y` / `X | None` (PEP 585/604)"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: import_from_statement
+  all:
+  - has:
+      kind: dotted_name
+      regex: "^typing$"
+  - has:
+      stopBy: end
+      kind: dotted_name
+      regex: "^(Dict|List|Optional|Tuple|Union|Set|FrozenSet|Type|DefaultDict|Deque|ChainMap|Counter|OrderedDict)$"
+---
+id: manual-str-join
+language: python
+severity: warning
+message: "building a string with `+=` in a loop - collect parts in a list then `''.join(parts)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: augmented_assignment
+  all:
+    - pattern: $S += $X
+    - has:
+        field: right
+        any:
+          - kind: string              # matches "..." and f"..." both
+          - pattern: str($_)
+          - pattern: $_.format($$$)
+          - pattern: repr($_)
+    - inside:
+        stopBy: end
+        any:
+          - kind: for_statement
+          - kind: while_statement
+---
+id: json-dumps-then-loads
+language: python
+severity: warning
+message: "`json.loads(json.dumps(x))` - use `copy.deepcopy(x)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: json.loads(json.dumps($X))
+---
+id: json-loads-read
+language: python
+severity: warning
+message: "`json.loads(f.read())` - use `json.load(f)`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  pattern: json.loads($F.read())
+---
+id: int-float-coerce
+language: python
+severity: warning
+message: "`int(float(x))` - parse once or validate input format (mis-handles strings like `'1e2'`)"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  pattern: int(float($X))
+---
+id: unnecessary-cast-str
+language: python
+severity: warning
+message: "`str('x')` - string literal is already a string"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  all:
+  - has:
+      kind: identifier
+      regex: ^str$
+  - has:
+      kind: argument_list
+      has:
+        kind: string
+---
+id: redundant-str-in-fstring
+language: python
+severity: warning
+message: "`f'{str(x)}'` - use `f'{x}'`, f-strings auto-convert"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: interpolation
+  has:
+    kind: call
+    pattern: str($X)
+---
+id: verbose-type-conversion-chain
+language: python
+severity: warning
+message: "Chained type conversions like `str(int(x))` - parse once or validate input format"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  any:
+  - pattern: str(int($X))
+  - pattern: int(str($X))
+  - pattern: str(float($X))
+  - pattern: float(str($X))
+  - pattern: list(tuple($X))
+  - pattern: tuple(list($X))
+---
+id: double-conversion-int-float
+language: python
+severity: warning
+message: "`int(float(x))` - parse directly or validate input (mis-handles `'1e2'`, `'1.5'`)"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: call
+  any:
+  - pattern: int(float($X))
+  - pattern: float(int($X))
+---
+id: verbose-string-concat-str
+language: python
+severity: warning
+message: "`str(x) + str(y)` - use `f'{x}{y}'`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: str($X) + str($Y)
+---
+id: verbose-string-literal-plus-str
+language: python
+severity: warning
+message: "`'...' + str(x)` - use `f'...{x}'`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: binary_operator
+  regex: ^['"].*['"]\s*\+\s*str\(
+---
+id: manual-quote-strip
+language: python
+severity: info
+message: "`if s.startswith(q) and s.endswith(q): s[1:-1]` - use `ast.literal_eval(s)` or `s.strip(q)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  pattern: "if $VAL.startswith($Q1) and $VAL.endswith($Q1):\n  $OUT = $VAL[1:-1]\n"
+---
+id: manual-bool-str-parse
+language: python
+severity: info
+message: "`if s == 'true': ... elif s == 'false': ...` - use `{'true': True, 'false': False}[s]` or `json.loads(s)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  pattern: "if $VAL == 'true':\n    $OUT = True\nelif $VAL == 'false':\n    $OUT =\
+    \ False\n"
+---
+id: manual-float-dot-check
+language: python
+severity: info
+message: "`if '.' in s: float(s)` - brittle; use `ast.literal_eval` or `try: float(s) except ValueError:`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  pattern: "if '.' in $VAL:\n    $OUT = float($VAL)\n"
+---
+id: manual-line-continuation-join
+language: python
+severity: info
+message: "`line += ' ' + part` in loop - collect parts into a list then `' '.join(parts)`"
+metadata:
+  weight: 1
+  category: slop
+rule:
+  pattern: $LINE += " " + $PART
+---
+id: returncode-int-cast
+language: python
+severity: warning
+message: int(proc.returncode) - returncode is already int
+metadata:
+  weight: 5
+  category: slop
+rule:
+  pattern: int($X.returncode)
+---
+id: suffix-slice-removesuffix
+language: python
+severity: warning
+message: "`s[:-len('literal')]` - use `s.removesuffix('literal')`"
+metadata:
+  weight: 5
+  category: slop
+rule:
+  kind: subscript
+  has:
+    kind: slice
+    regex: "^:\\s*-\\s*len\\(\\s*['\"].*['\"]\\s*\\)\\s*$"

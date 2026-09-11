@@ -1,7 +1,7 @@
 ---
 name: slopcode-measurements
 description: Measure SlopCodeBench-style code sloppiness for a repository: raw scb-check metrics (verbosity, erosion, clone LOC, Python rules) plus mapped ast-grep rule metrics for a requested language such as Zig. Use when asked to run code slop/sloppiness/verbosity/erosion measurements, port Python slop rules to another language, or compare raw versus language-mapped slop scores.
-compatibility: Requires either this skill workspace's devenv shell or installed dependencies: uv/uvx, ast-grep, tree-sitter, gcc, git, jq, and python3.12+ for raw scb-check mode. Bundled mapped rules currently include Zig.
+compatibility: Requires either this skill workspace's devenv shell or installed dependencies: uv/uvx, ast-grep, tree-sitter, gcc, git, jq, and python3.12+ for raw scb-check mode. Bundled mapped rules include common languages plus Zig via custom Tree-sitter.
 ---
 
 # SlopCodeBench Measurements
@@ -58,8 +58,11 @@ scripts/measure.sh --mode raw /path/to/repo
 Mapped only:
 
 ```bash
+scripts/measure.sh --language typescript --mode mapped /path/to/repo
 scripts/measure.sh --language zig --mode mapped /path/to/repo
 ```
+
+Bundled mapped languages: `python`, `javascript`, `typescript`, `tsx`, `rust`, `go`, `java`, `c`, `cpp`, `csharp`, `swift`, `kotlin`, `ruby`, `php`, `zig`. Aliases: `py`, `js`, `ts`, `rs`, `c++`, `cs`.
 
 Both raw and mapped:
 
@@ -75,7 +78,7 @@ Default excludes applied to both raw and mapped scans:
 
 Add more with repeated `--exclude GLOB` flags.
 
-Custom language/rules:
+Custom language/rules beyond the bundled packs:
 
 ```bash
 scripts/measure.sh \
@@ -101,6 +104,7 @@ scripts/measure.sh \
 - `mapped_total_loc`: approximate SLOC for files with the requested language extension after excludes
 - `mapped_ast_grep_unique_start_loc`: unique start lines of mapped ast-grep hits
 - `mapped_ast_grep_unique_span_loc` / `mapped_ast_grep_unique_loc`: unique full-span lines touched by mapped ast-grep hits
+- `mapped_ast_grep_pct`: mapped span LOC divided by mapped language LOC; compare only within the same language/rule pack
 - `unique_rule_line_pairs`: unique `(file, start line, rule)` triples; useful because mechanical mappings can intentionally map several Python source rules to the same language pattern
 - `raw_plus_mapped_verbosity_upper_bound`: currently null; true combined verbosity requires line-level union with raw findings, which raw `scb-check` JSON does not expose
 - `top_rules`, `top_files`
@@ -113,6 +117,8 @@ The Zig workflow uses ast-grep custom language support:
 2. It builds a dynamic parser library with `tree-sitter build --output zig.so`.
 3. It writes a custom `sgconfig.yml` registering Zig with `expandoChar: _`.
 4. `measure.sh` scans using `rules/zig/mechanical.yml`.
+
+See `docs/methodology.md` for mapped-rule methodology and cross-language caveats. Common-language mapped packs use broad ast-grep regex/AST hybrids for coverage; Zig is the most literal Python-rule port because custom Tree-sitter support was the original target.
 
 The Zig mechanical rule pack is a one-to-one port of the Python slop rule IDs where possible:
 
