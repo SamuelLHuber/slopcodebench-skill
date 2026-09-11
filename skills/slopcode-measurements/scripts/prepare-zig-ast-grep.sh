@@ -3,7 +3,8 @@ set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 skill_dir="$(cd -- "$script_dir/.." && pwd)"
-cache_dir="${SCB_SKILL_CACHE_DIR:-$skill_dir/.cache}"
+cache_base="${XDG_CACHE_HOME:-$HOME/.cache}"
+cache_dir="${SCB_SKILL_CACHE_DIR:-$cache_base/slopcode-measurements}"
 parser_dir="$cache_dir/tree-sitter-zig"
 lib_path="$cache_dir/zig.so"
 config_path="$cache_dir/sgconfig.zig.yml"
